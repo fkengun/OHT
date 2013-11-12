@@ -47,6 +47,7 @@ public:
 	virtual void process(const int& fd, const char * const buf, sockaddr sender);
 
 private:
+        void forward(ProtoAddr addr, const void *recvbuf);
 	ProtoStub *_stub;
 };
 

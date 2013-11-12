@@ -1,4 +1,4 @@
-TARGETS = zht_ctest zht_cpptest zht_ben zhtserver libzht.a c_zhtclient_threaded_test cpp_zhtclient_threaded_test c_zhtclient_lanl_threaded
+TARGETS = zht_ctest zht_cpptest zht_ben zhtserver zhtproxy libzht.a c_zhtclient_threaded_test cpp_zhtclient_threaded_test c_zhtclient_lanl_threaded
 CC = gcc
 CCFLAGS = -g -I${USER_INCLUDE} -L${USER_LIB} -DPF_INET -DBIG_MSG -DSOCKET_CACHE -DSCCB
 #CCFLAGS = -g -I${USER_INCLUDE} -L${USER_LIB} -DPF_INET -DBIG_MSG -DTHREADED_SERVE -DSOCKET_CACHE -DSCCB
@@ -67,6 +67,14 @@ EpollServer.o ZProcessor.o ip_server.o HTWorker.o StrTokenizer.o
 	$(CC) $(CCFLAGS) -o $@ $^ $(LIBFLAGS)
 
 
+zhtproxy: ZHTProxy.o lock_guard.o meta.pb-c.o lru_cache.o meta.pb.o zpack.pb.o novoht.o bigdata_transfer.o\
+Const.o ConfHandler.o ConfEntry.o \
+ProxyStubFactory.o proxy_stub.o ip_proxy_stub.o mq_proxy_stub.o ipc_plus.o tcp_proxy_stub.o udp_proxy_stub.o \
+ZHTUtil.o Env.o Util.o StrTokenizer.o\
+EpollProxy.o ZProcessor.o ip_proxy.o HTWorker.o StrTokenizer.o EpollServer.o
+	$(CC) $(CCFLAGS) -o $@ $^ $(LIBFLAGS)
+
+
 libzht.a: 
 	ar r libzht.a *.o	
 
@@ -119,9 +127,12 @@ Env.o: Env.cpp
 Util.o: Util.cpp
 
 EpollServer.o: EpollServer.cpp
+EpollProxy.o: EpollProxy.cpp
 ZProcessor.o: ZProcessor.cpp
 ZHTServer.o: ZHTServer.cpp
+ZHTProxy.o: ZHTProxy.cpp
 ip_server.o: ip_server.cpp
+ip_proxy.o: ip_proxy.cpp
 HTWorker.o: HTWorker.cpp
 StrTokenizer.o: StrTokenizer.cpp
 

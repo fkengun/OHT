@@ -68,6 +68,10 @@ void IPProxy::process(const int& fd, const char * const buf, sockaddr sender) {
 
 	string bufstr(buf);
 	//_stub->recvsend(pa, bufstr.c_str()); // commented by fk for hierarchical proxy
-	_stub->forward(pa, bufstr.c_str());
+	forward(pa, bufstr.c_str());
+}
+
+void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
+    
 }
 
