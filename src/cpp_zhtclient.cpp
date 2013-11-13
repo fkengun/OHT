@@ -320,10 +320,10 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 	// oht: revise here
 	// int sentSize = sendTo(sock, sendbuf, sendcount);
 	//_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
+	// 1. send and recv
+	_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
+	// 2. set up a server socket
 	int std;
-
-	_proxy->mysend(msg.c_str(), msg.size(), buf, msz);
-
 	std=_proxy->makeSvrSocket();
 	sockaddr *in_addr = (sockaddr *) calloc(1,
 			sizeof(struct sockaddr));
@@ -343,7 +343,7 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 			break;
 		}
 	}
-	//  receive message from the
+	// 3. receive message from the
 	char *my_buf = (char*) calloc(_msg_maxsize, sizeof(char));
 	size_t my_msz = _msg_maxsize;
 
