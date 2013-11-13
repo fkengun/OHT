@@ -316,7 +316,41 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 	size_t msz = _msg_maxsize;
 
 	/*send to and receive from*/
-	_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
+
+	// oht: revise here
+	// int sentSize = sendTo(sock, sendbuf, sendcount);
+	//_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
+	int std;
+
+	_proxy->mysend(msg.c_str(), msg.size(), buf, msz);
+
+	std=_proxy->makeSvrSocket();
+	sockaddr *in_addr = (sockaddr *) calloc(1,
+			sizeof(struct sockaddr));
+	socklen_t in_len = sizeof(struct sockaddr);
+	int infd = accept(sfd, in_addr, &in_len);
+	if (infd == -1) {
+
+		free(in_addr);
+
+		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+
+			/* We have processed all incoming connections. */
+			break;
+		} else {
+
+			perror("accept");
+			break;
+		}
+	}
+	//  receive message from the
+	char *my_buf = (char*) calloc(_msg_maxsize, sizeof(char));
+	size_t my_msz = _msg_maxsize;
+
+	ssize_t recv(infd, my_buf, my_ms,0);
+
+
+
 
 	/*...parse status and result*/
 	string sstatus;

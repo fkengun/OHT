@@ -53,7 +53,10 @@ public:
 	virtual bool sendrecv(const void *sendbuf, const size_t sendcount,
 			void *recvbuf, size_t &recvcount);
 	virtual bool teardown();
-
+	// oht
+	virtual bool mysend(const void *sendbuf, const size_t sendcount,
+			void *recvbuf, size_t &recvcount);
+	virtual int makeSvrSocket();
 protected:
 	virtual int getSockCached(const string& host, const uint& port);
 	virtual int makeClientSocket(const string& host, const uint& port);
