@@ -41,7 +41,7 @@
 using namespace iit::datasys::zht::dm;
 
 ZHTClient::ZHTClient() :
-		_proxy(0), _msg_maxsize(0) {
+	_proxy(0), _msg_maxsize(0) {
 
 }
 
@@ -87,9 +87,8 @@ int ZHTClient::commonOp(const string &opcode, const string &key,
 		const string &val, const string &val2, string &result, int lease) {
 
 	if (opcode != Const::ZSC_OPC_LOOKUP && opcode != Const::ZSC_OPC_REMOVE
-			&& opcode != Const::ZSC_OPC_INSERT
-			&& opcode != Const::ZSC_OPC_APPEND
-			&& opcode != Const::ZSC_OPC_CMPSWP
+			&& opcode != Const::ZSC_OPC_INSERT && opcode
+			!= Const::ZSC_OPC_APPEND && opcode != Const::ZSC_OPC_CMPSWP
 			&& opcode != Const::ZSC_OPC_STCHGCB)
 		return Const::toInt(Const::ZSC_REC_UOPC);
 
@@ -323,12 +322,33 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 	// 1. send and recv
 	_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
 	// 2. set up a server socket
-	int std;
-	std=_proxy->makeSvrSocket();
-	sockaddr *in_addr = (sockaddr *) calloc(1,
-			sizeof(struct sockaddr));
+	int port = 55000;
+	struct sockaddr_in svrAdd_in;
+	int svrSock = -1;
+
+	memset(&svrAdd_in, 0, sizeof(struct sockaddr_in));
+	svrAdd_in.sin_family = AF_INET;
+	svrAdd_in.sin_addr.s_addr = INADDR_ANY;
+	svrAdd_in.sin_port = htons(port);
+
+	svrSock = socket(AF_INET, SOCK_STREAM, 0);
+
+	printf("%d\n", svrSock);
+
+	if (bind(svrSock, (struct sockaddr*) &svrAdd_in, sizeof(struct sockaddr))
+			< 0) {
+		printf("error\n");
+	}
+
+	if (listen(svrSock, 5) < 0) {
+		printf("error\n");
+	}
+
+	sockaddr *in_addr = (sockaddr *) calloc(1, sizeof(struct sockaddr));
 	socklen_t in_len = sizeof(struct sockaddr);
-	int infd = accept(sfd, in_addr, &in_len);
+	int infd = accept(svrSock, in_addr, &in_len);
+
+	// 3. wait for a connection
 	if (infd == -1) {
 
 		free(in_addr);
@@ -343,14 +363,11 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 			break;
 		}
 	}
-	// 3. receive message from the
+	// 4. receive message from the
 	char *my_buf = (char*) calloc(_msg_maxsize, sizeof(char));
 	size_t my_msz = _msg_maxsize;
 
-	ssize_t recv(infd, my_buf, my_ms,0);
-
-
-
+	ssize_t recv(infd, my_buf, my_ms, 0);
 
 	/*...parse status and result*/
 	string sstatus;
