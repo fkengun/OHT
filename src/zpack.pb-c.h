@@ -27,16 +27,22 @@ struct  _ZPack
   ProtobufCBinaryData val;
   protobuf_c_boolean has_newval;
   ProtobufCBinaryData newval;
+  protobuf_c_boolean has_lease;
+  ProtobufCBinaryData lease;
   protobuf_c_boolean has_valnull;
   protobuf_c_boolean valnull;
   protobuf_c_boolean has_newvalnull;
   protobuf_c_boolean newvalnull;
   protobuf_c_boolean has_replicanum;
   int32_t replicanum;
+  protobuf_c_boolean has_client_ip;
+  ProtobufCBinaryData client_ip;
+  protobuf_c_boolean has_client_port;
+  int32_t client_port;
 };
 #define ZPACK__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&zpack__descriptor) \
-    , 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,0, 0,0, 0,0 }
+    , 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,0, 0,0, 0,0, 0,{0,NULL}, 0,0 }
 
 
 /* ZPack methods */

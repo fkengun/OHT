@@ -32,46 +32,122 @@
 
 #include  "ProxyStubFactory.h"
 
+/* added by fk for OHT */
+#include "ZHTUtil.h"
+#include "zpack.pb.h"
+#include "ip_proxy_stub.h"
+#include <netdb.h>
+#include <sys/socket.h>
+#include <iostream>
+/* end add */
+
 #include <string.h>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
 
 using namespace std;
+using namespace iit::datasys::zht::dm;
 
 IPProxy::IPProxy() :
-		_stub(ProxyStubFactory::createStub()) {
+_stub(ProxyStubFactory::createStub()) {
 }
 
 IPProxy::~IPProxy() {
 
-	if (_stub != NULL) {
+    if (_stub != NULL) {
 
-		delete _stub;
-		_stub = NULL;
-	}
+        delete _stub;
+        _stub = NULL;
+    }
 }
 
 void IPProxy::process(const int& fd, const char * const buf, sockaddr sender) {
 
-	if (_stub == 0) {
+    if (_stub == 0) {
 
-		fprintf(stderr,
-				"IPServer::process(): error on ProxyStubFactory::createStub().\n");
-		return;
-	}
+        fprintf(stderr,
+                "IPServer::process(): error on ProxyStubFactory::createStub().\n");
+        return;
+    }
 
-	ProtoAddr pa;
-	pa.fd = fd;
-	pa.sender = calloc(1, sizeof(sockaddr));
-	memcpy(pa.sender, &sender, sizeof(sockaddr));
+    ProtoAddr pa;
+    pa.fd = fd;
+    pa.sender = calloc(1, sizeof (sockaddr));
+    memcpy(pa.sender, &sender, sizeof (sockaddr));
 
-	string bufstr(buf);
-	//_stub->recvsend(pa, bufstr.c_str()); // commented by fk for hierarchical proxy
-	forward(pa, bufstr.c_str());
+    string bufstr(buf);
+    //_stub->recvsend(pa, bufstr.c_str()); // commented by fk for hierarchical proxy
+    forward(pa, bufstr.c_str());
 }
 
 void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
+    //printf("OHT: forward invoked\n");
+    printf("\nOHT: recvbuf: %s\n\n", recvbuf);
+
+    string recvstr((char *) recvbuf);
+    ZPack zpack;
+    ZHTUtil zu;
+
+    /* send an acknowledge to client */
+    string result("result");
+    _stub->sendBack(addr, result.data(), result.size());
     
+    /* calculate the dest server*/
+    zpack.ParseFromString(recvstr);
+    string key = zpack.key();
+    HostEntity he = zu.getHostEntityByKey(recvstr);
+    printf("OHT: Host: %s, port: %d\n", he.host.c_str(), he.port);
+
+    /* connect with server */
+    struct sockaddr_in dest;
+    memset(&dest, 0, sizeof (struct sockaddr_in)); /*zero the struct*/
+    dest.sin_family = PF_INET; /*storing the server info in sockaddr_in structure*/
+    dest.sin_port = htons(he.port);
+
+    struct hostent * hinfo = gethostbyname(he.host.c_str());
+    if (hinfo == NULL) {
+        cerr << "TCPProxy::makeClientSocket(): ";
+        herror(he.host.c_str());
+        return;
+    }
+
+    memcpy(&dest.sin_addr, hinfo->h_addr, sizeof (dest.sin_addr));
+
+    int sock = socket(PF_INET, SOCK_STREAM, 0); //try change here.................................................
+
+    if (sock < 0) {
+
+        cerr << "TCPProxy::makeClientSocket(): error on ::socket(...): "
+                << endl;
+        return;
+    }
+
+    int ret_con = connect(sock, (struct sockaddr *) &dest, sizeof (sockaddr));
+
+    if (ret_con < 0) {
+
+        cerr << "TCPProxy::makeClientSocket(): error on ::connect(...): "
+                << endl;
+        return;
+    }
+
+    /* make the socket reusable */
+    int reuse_addr = 1;
+    int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
+            sizeof (reuse_addr));
+    if (ret < 0) {
+        cerr << "resuse socket failed: [" << sock << "], " << endl;
+        return;
+    } else
+        return;
+    
+    /* add IP address and port to zpack msg */
+    zpack.set_client_ip(he.host);
+    zpack.set_client_port(he.port);
+    
+    /* forward the request to server */
+    recvstr = zpack.SerializeAsString();
+    _stub->sendBack(addr, recvstr.c_str(), recvstr.size());
 }
 

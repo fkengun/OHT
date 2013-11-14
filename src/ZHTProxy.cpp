@@ -56,6 +56,7 @@ int main(int argc, char **argv) {
 	string port_from_conf;
 	string zhtConf;
 	string neighborConf;
+        string serverConf; // added by fk, server list conf file for OHT
 	string novohtDbFile;
 
 	int c;
@@ -67,6 +68,11 @@ int main(int argc, char **argv) {
 		case 'n':
 			neighborConf = string(optarg);
 			break;
+                /* added by fk, option for proxy in OHT */
+                case 's':
+			serverConf = string(optarg);
+			break;
+                /* end add */
 		case 'p':
 			port_from_input = string(optarg);
 			break;
@@ -95,7 +101,7 @@ int main(int argc, char **argv) {
 			ConfHandler::NOVOHT_FILE = Const::trim(novohtDbFile);
 
 			/*init config*/
-			ConfHandler::initConf(zhtConf, neighborConf);
+			ConfHandler::initProxyConf(zhtConf, neighborConf, serverConf); // modified by fk, add server list conf file for OHT 
 
 			/*get protocol and port*/
 			protocol = ConfHandler::getProtocolFromConf();

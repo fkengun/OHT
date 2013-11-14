@@ -33,6 +33,11 @@
 #include  <stdlib.h>
 #include <string.h>
 
+/* added by fk for OHT */
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <errno.h>
+
 #include "zpack.pb.h"
 #include "ConfHandler.h"
 #include "Env.h"
@@ -322,7 +327,7 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 	// 1. send and recv
 	_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
 	// 2. set up a server socket
-	int port = 55000;
+	int port = 55555;
 	struct sockaddr_in svrAdd_in;
 	int svrSock = -1;
 
@@ -333,41 +338,41 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 
 	svrSock = socket(AF_INET, SOCK_STREAM, 0);
 
-	printf("%d\n", svrSock);
+	printf("svrSock: %d\n", svrSock);
 
 	if (bind(svrSock, (struct sockaddr*) &svrAdd_in, sizeof(struct sockaddr))
 			< 0) {
-		printf("error\n");
+		perror("bind error\n");
 	}
 
 	if (listen(svrSock, 5) < 0) {
-		printf("error\n");
+		printf("listen error\n");
 	}
 
 	sockaddr *in_addr = (sockaddr *) calloc(1, sizeof(struct sockaddr));
 	socklen_t in_len = sizeof(struct sockaddr);
-	int infd = accept(svrSock, in_addr, &in_len);
+//	int infd = accept(svrSock, in_addr, &in_len);
 
-	// 3. wait for a connection
-	if (infd == -1) {
-
-		free(in_addr);
-
-		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-
-			/* We have processed all incoming connections. */
-			break;
-		} else {
-
-			perror("accept");
-			break;
-		}
-	}
+//	// 3. wait for a connection
+//	if (infd == -1) {
+//
+//		free(in_addr);
+//
+//		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+//
+//			/* We have processed all incoming connections. */
+//			break;
+//		} else {
+//
+//			perror("accept");
+//			break;
+//		}
+//	}
 	// 4. receive message from the
 	char *my_buf = (char*) calloc(_msg_maxsize, sizeof(char));
 	size_t my_msz = _msg_maxsize;
 
-	ssize_t recv(infd, my_buf, my_ms, 0);
+//	recv(infd, my_buf, my_msz, 0);
 
 	/*...parse status and result*/
 	string sstatus;

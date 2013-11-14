@@ -50,12 +50,17 @@ bool ConfHandler::BEEN_INIT = false;
 
 ConfHandler::VEC ConfHandler::NeighborVector = VEC();
 ConfHandler::MAP ConfHandler::NeighborSeeds = MAP();
+/* added by fk, variables for server list info */
+ConfHandler::VEC ConfHandler::ServerVector = VEC();
+ConfHandler::MAP ConfHandler::ServerSeeds = MAP();
+/* end add */
 ConfHandler::MAP ConfHandler::ZHTParameters = MAP();
 ConfHandler::MAP ConfHandler::NodeParameters = MAP();
 
 string ConfHandler::CONF_ZHT = "zht.conf";
 string ConfHandler::CONF_NODE = "node.conf";
 string ConfHandler::CONF_NEIGHBOR = "neighbor.conf";
+string ConfHandler::CONF_SERVER = "server.conf"; // added by fk for OHT
 string ConfHandler::NOVOHT_FILE = "";
 
 uint ConfHandler::ZC_MAX_ZHT = 0;
@@ -125,11 +130,35 @@ void ConfHandler::initConf(string zhtConf, string neighborConf) {
 	}
 }
 
+/* similar with the default init function, add server list conf file */
+void ConfHandler::initProxyConf(string zhtConf, string neighborConf, string serverConf) {
+
+	if (!BEEN_INIT) {
+
+		ConfHandler::CONF_ZHT = zhtConf; //zht.conf
+		ConfHandler::CONF_NEIGHBOR = neighborConf; //neighbor.conf
+                ConfHandler::CONF_SERVER = serverConf; //server.conf
+
+		ConfHandler::setZHTParameters(zhtConf);
+		ConfHandler::setNeighborSeeds(neighborConf);
+                ConfHandler::setServerSeeds(serverConf);
+
+		BEEN_INIT = true;
+	}
+}
+
 void ConfHandler::setNeighborSeeds(const string& neighborCfg) {
 
 	setParametersInternal(neighborCfg, NeighborSeeds);
 
 	setNeighborVector(NeighborVector);
+}
+
+void ConfHandler::setServerSeeds(const string& serverCfg) {
+
+	setParametersInternal(serverCfg, ServerSeeds);
+
+	setServerVector(ServerVector);
 }
 
 void ConfHandler::setZHTParameters(const string& zhtConfig) {
@@ -192,6 +221,17 @@ void ConfHandler::setNeighborVector(VEC &neighborVector) {
 	for (kvi = map->begin(); kvi != map->end(); kvi++) {
 
 		neighborVector.push_back(kvi->second);
+	}
+}
+
+void ConfHandler::setServerVector(VEC &serverVector) {
+
+	ConfHandler::MIT kvi;
+	ConfHandler::MAP* map = &ConfHandler::ServerSeeds;
+
+	for (kvi = map->begin(); kvi != map->end(); kvi++) {
+
+		serverVector.push_back(kvi->second);
 	}
 }
 

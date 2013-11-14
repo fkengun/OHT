@@ -63,14 +63,17 @@ public:
 	virtual ~ConfHandler();
 
 	static void initConf(string zhtConf, string neighborConf);
+        static void initProxyConf(string zhtConf, string neighborConf, string serverconf); // added by fk, for OHT
 	static string getPortFromConf();
 	static string getProtocolFromConf();
 	static string get_zhtconf_parameter(const string &paraname);
 
 private:
 	static void setNeighborSeeds(const string& neighborCfg);
+        static void setServerSeeds(const string& serverCfg); // added by fk, for OHT
 	static void setZHTParameters(const string& zhtConfig);
 	static void setNeighborVector(VEC &neighborVector);
+        static void setServerVector(VEC &neighborVector); // added by fk, for OHT
 	static void setNodeParameters(const string& nodeConfig);
 
 	static void pickNodeParameters();
@@ -81,6 +84,10 @@ private:
 public:
 	static VEC NeighborVector;
 	static MAP NeighborSeeds;
+        /* added by fk, variables for server list info */
+        static VEC ServerVector;
+	static MAP ServerSeeds;
+        /* end add */
 	static MAP ZHTParameters;
 	static MAP NodeParameters;
 
@@ -90,6 +97,7 @@ public:
 	static string CONF_ZHT;
 	static string CONF_NODE;
 	static string CONF_NEIGHBOR;
+        static string CONF_SERVER;      /* added by fk, for OHT */
 	static string NOVOHT_FILE;
 
 public:

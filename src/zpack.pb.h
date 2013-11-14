@@ -164,6 +164,24 @@ class ZPack : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 replicanum() const;
   inline void set_replicanum(::google::protobuf::int32 value);
   
+  // optional bytes client_ip = 9;
+  inline bool has_client_ip() const;
+  inline void clear_client_ip();
+  static const int kClientIpFieldNumber = 9;
+  inline const ::std::string& client_ip() const;
+  inline void set_client_ip(const ::std::string& value);
+  inline void set_client_ip(const char* value);
+  inline void set_client_ip(const void* value, size_t size);
+  inline ::std::string* mutable_client_ip();
+  inline ::std::string* release_client_ip();
+  
+  // optional int32 client_port = 10;
+  inline bool has_client_port() const;
+  inline void clear_client_port();
+  static const int kClientPortFieldNumber = 10;
+  inline ::google::protobuf::int32 client_port() const;
+  inline void set_client_port(::google::protobuf::int32 value);
+  
   // @@protoc_insertion_point(class_scope:ZPack)
  private:
   inline void set_has_opcode();
@@ -182,6 +200,10 @@ class ZPack : public ::google::protobuf::Message {
   inline void clear_has_newvalnull();
   inline void set_has_replicanum();
   inline void clear_has_replicanum();
+  inline void set_has_client_ip();
+  inline void clear_has_client_ip();
+  inline void set_has_client_port();
+  inline void clear_has_client_port();
   
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   
@@ -193,9 +215,11 @@ class ZPack : public ::google::protobuf::Message {
   bool valnull_;
   bool newvalnull_;
   ::google::protobuf::int32 replicanum_;
+  ::std::string* client_ip_;
+  ::google::protobuf::int32 client_port_;
   
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
   
   friend void  protobuf_AddDesc_zpack_2eproto();
   friend void protobuf_AssignDesc_zpack_2eproto();
@@ -565,6 +589,86 @@ inline ::google::protobuf::int32 ZPack::replicanum() const {
 inline void ZPack::set_replicanum(::google::protobuf::int32 value) {
   set_has_replicanum();
   replicanum_ = value;
+}
+
+// optional bytes client_ip = 9;
+inline bool ZPack::has_client_ip() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void ZPack::set_has_client_ip() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void ZPack::clear_has_client_ip() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void ZPack::clear_client_ip() {
+  if (client_ip_ != &::google::protobuf::internal::kEmptyString) {
+    client_ip_->clear();
+  }
+  clear_has_client_ip();
+}
+inline const ::std::string& ZPack::client_ip() const {
+  return *client_ip_;
+}
+inline void ZPack::set_client_ip(const ::std::string& value) {
+  set_has_client_ip();
+  if (client_ip_ == &::google::protobuf::internal::kEmptyString) {
+    client_ip_ = new ::std::string;
+  }
+  client_ip_->assign(value);
+}
+inline void ZPack::set_client_ip(const char* value) {
+  set_has_client_ip();
+  if (client_ip_ == &::google::protobuf::internal::kEmptyString) {
+    client_ip_ = new ::std::string;
+  }
+  client_ip_->assign(value);
+}
+inline void ZPack::set_client_ip(const void* value, size_t size) {
+  set_has_client_ip();
+  if (client_ip_ == &::google::protobuf::internal::kEmptyString) {
+    client_ip_ = new ::std::string;
+  }
+  client_ip_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ZPack::mutable_client_ip() {
+  set_has_client_ip();
+  if (client_ip_ == &::google::protobuf::internal::kEmptyString) {
+    client_ip_ = new ::std::string;
+  }
+  return client_ip_;
+}
+inline ::std::string* ZPack::release_client_ip() {
+  clear_has_client_ip();
+  if (client_ip_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = client_ip_;
+    client_ip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+
+// optional int32 client_port = 10;
+inline bool ZPack::has_client_port() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void ZPack::set_has_client_port() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void ZPack::clear_has_client_port() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void ZPack::clear_client_port() {
+  client_port_ = 0;
+  clear_has_client_port();
+}
+inline ::google::protobuf::int32 ZPack::client_port() const {
+  return client_port_;
+}
+inline void ZPack::set_client_port(::google::protobuf::int32 value) {
+  set_has_client_port();
+  client_port_ = value;
 }
 
 
