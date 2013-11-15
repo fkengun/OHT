@@ -31,42 +31,105 @@
 #include "ip_server.h"
 
 #include  "ProxyStubFactory.h"
+#include "ZHTUtil.h"
+#include "zpack.pb.h"
 
 #include <string.h>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
 
+/* added by fk for OHT */
+#include <netdb.h>
+/* end add */
+
 using namespace std;
 
 IPServer::IPServer() :
-		_stub(ProxyStubFactory::createStub()) {
+_stub(ProxyStubFactory::createStub()) {
 }
 
 IPServer::~IPServer() {
 
-	if (_stub != NULL) {
+    if (_stub != NULL) {
 
-		delete _stub;
-		_stub = NULL;
-	}
+        delete _stub;
+        _stub = NULL;
+    }
 }
 
 void IPServer::process(const int& fd, const char * const buf, sockaddr sender) {
 
-	if (_stub == 0) {
+    if (_stub == 0) {
 
-		fprintf(stderr,
-				"IPServer::process(): error on ProxyStubFactory::createStub().\n");
-		return;
-	}
+        fprintf(stderr,
+                "IPServer::process(): error on ProxyStubFactory::createStub().\n");
+        return;
+    }
 
-	ProtoAddr pa;
-	pa.fd = fd;
-	pa.sender = calloc(1, sizeof(sockaddr));
-	memcpy(pa.sender, &sender, sizeof(sockaddr));
+    ProtoAddr pa;
+    pa.fd = fd;
+    pa.sender = calloc(1, sizeof (sockaddr));
+    memcpy(pa.sender, &sender, sizeof (sockaddr));
 
-	string bufstr(buf);
-	_stub->recvsend(pa, bufstr.c_str());
+    string bufstr(buf);
+    /* added by fk for OHT*/
+    respond(bufstr.c_str(), pa);
+    /* end add */
+    _stub->recvsend(pa, bufstr.c_str());
 }
 
+void IPServer::respond(const char * const buf, ProtoAddr& addr) {
+    /* get the dest client from zpack */
+    string msg((char *) buf);
+    ZPack zpack;
+    HostEntity client;
+    
+    zpack.ParseFromString(msg);
+    client.host = zpack.client_ip();
+    client.port = zpack.client_port();
+    printf("OHT: Respond to client: %s, port: %d\n", client.host.c_str(), client.port);
+    
+    /* connect with the client */
+    struct sockaddr_in dest;
+    memset(&dest, 0, sizeof (struct sockaddr_in)); /*zero the struct*/
+    dest.sin_family = PF_INET; /*storing the server info in sockaddr_in structure*/
+    dest.sin_port = htons(55555);
+
+    struct hostent * hinfo = gethostbyname(client.host.c_str());
+    if (hinfo == NULL) {
+        fprintf(stderr, "TCPProxy::makeClientSocket(): \n");
+        herror(client.host.c_str());
+        return;
+    }
+
+    memcpy(&dest.sin_addr, hinfo->h_addr, sizeof (dest.sin_addr));
+
+    int sock = socket(PF_INET, SOCK_STREAM, 0); //try change here.................................................
+
+    if (sock < 0) {
+        perror("TCPProxy::makeClientSocket(): error on ::socket(...): ");
+        return;
+    }
+
+    int ret_con = connect(sock, (struct sockaddr *) &dest, sizeof (sockaddr));
+
+    if (ret_con < 0) {
+        perror("TCPProxy::makeClientSocket(): error on ::connect(...): ");
+        return;
+    }
+
+    /* make the socket reusable */
+    int reuse_addr = 1;
+    int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
+            sizeof (reuse_addr));
+    if (ret < 0) {
+        perror("reuse socket failed: ");
+        return;
+    }
+    
+    /* set the address */
+    addr.fd = sock;
+    addr.sender = calloc(1, sizeof (sockaddr));
+    memcpy(addr.sender, &dest, sizeof (sockaddr));
+}

@@ -351,7 +351,7 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 
 	sockaddr *in_addr = (sockaddr *) calloc(1, sizeof(struct sockaddr));
 	socklen_t in_len = sizeof(struct sockaddr);
-//	int infd = accept(svrSock, in_addr, &in_len);
+	int infd = accept(svrSock, in_addr, &in_len);
 
 //	// 3. wait for a connection
 //	if (infd == -1) {
@@ -372,7 +372,8 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 	char *my_buf = (char*) calloc(_msg_maxsize, sizeof(char));
 	size_t my_msz = _msg_maxsize;
 
-//	recv(infd, my_buf, my_msz, 0);
+	recv(infd, my_buf, my_msz, 0);
+        printf("received something\n");
 
 	/*...parse status and result*/
 	string sstatus;

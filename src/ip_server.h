@@ -48,6 +48,8 @@ public:
 			sockaddr sender);
 
 private:
+        void respond(const char * const buf, ProtoAddr& addr);
+    
 	ProtoStub *_stub;
 };
 

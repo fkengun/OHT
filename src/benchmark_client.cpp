@@ -236,11 +236,11 @@ int benchmark(string &zhtConf, string &neighborConf) {
 
 	benchmarkInsert();
 
-	benchmarkLookup();
+	//benchmarkLookup();
 
-	benchmarkAppend();
+	//benchmarkAppend();
 
-	benchmarkRemove();
+	//benchmarkRemove();
 
 	zc.teardown();
 

@@ -53,7 +53,7 @@ public:
 	virtual bool sendrecv(const void *sendbuf, const size_t sendcount,
 			void *recvbuf, size_t &recvcount);
         /* added by fk for OHT, get host from server list instead of neighbor list */
-        virtual bool forwardrecv(const void *sendbuf, const size_t sendcount,
+        virtual bool recvforward(const void *sendbuf, const size_t sendcount,
 			void *recvbuf, size_t &recvcount);
         /* end add */
 	virtual bool teardown();

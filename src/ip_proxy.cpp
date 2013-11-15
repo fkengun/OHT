@@ -103,9 +103,8 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     string result("result");
     _stub->sendBack(addr, result.data(), result.size());
 
-    /* calculate the dest server*/
+    /* calculate the dest server */
     zpack.ParseFromString(recvstr);
-    string key = zpack.key();
     HostEntity he = zu.getServerEntityByKey(recvstr);
     cout << "OHT: Forward to server: " << he.host.c_str() << ", port: " << he.port << endl;
 
@@ -129,7 +128,6 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     int sock = socket(PF_INET, SOCK_STREAM, 0); //try change here.................................................
 
     if (sock < 0) {
-
         cerr << "TCPProxy::makeClientSocket(): error on ::socket(...): "
                 << endl;
         return;
@@ -138,7 +136,6 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     int ret_con = connect(sock, (struct sockaddr *) &dest, sizeof (sockaddr));
 
     if (ret_con < 0) {
-
         cerr << "TCPProxy::makeClientSocket(): error on ::connect(...): "
                 << endl;
         return;
@@ -163,7 +160,7 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     recvstr = zpack.SerializeAsString();
     char *buf = (char*) calloc(Env::get_msg_maxsize(), sizeof (char));
     size_t msz = Env::get_msg_maxsize();
-    _proxy->forwardrecv(recvstr.c_str(), recvstr.size(), buf, msz);
+    _proxy->recvforward(recvstr.c_str(), recvstr.size(), buf, msz);
 
     free(buf);
     cout << "OHT: Request has been forward to server successfully" << endl;

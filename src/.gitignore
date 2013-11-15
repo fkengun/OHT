@@ -1,5 +1,18 @@
+# Object files #
 *.o
 *.so
 *.a
+
+# OS generated files #
 .DS_Store
 Thumbs.db
+
+# Executables #
+zht_ben
+zht_cpptest
+zht_ctest
+zhtproxy
+zhtserver
+cpp_zhtclient_threaded_test
+c_zhtclient_lanl_threaded
+c_zhtclient_threaded_test

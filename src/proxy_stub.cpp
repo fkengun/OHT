@@ -78,7 +78,7 @@ bool ProtoProxy::sendrecv(const void *sendbuf, const size_t sendcount,
 }
 
 /* added by fk for OHT, used by proxy node */
-bool ProtoProxy::forwardrecv(const void *sendbuf, const size_t sendcount,
+bool ProtoProxy::recvforward(const void *sendbuf, const size_t sendcount,
 		void *recvbuf, size_t &recvcount) {
 
 	return false;

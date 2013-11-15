@@ -88,7 +88,8 @@ bool TCPProxy::sendrecv(const void *sendbuf, const size_t sendcount,
 	return sent_bool && recv_bool;
 }
 
-bool TCPProxy::forwardrecv(const void *sendbuf, const size_t sendcount,
+/* added by fk for OHT */
+bool TCPProxy::recvforward(const void *sendbuf, const size_t sendcount,
 		void *recvbuf, size_t &recvcount) {
 
 	/*get client sock fd*/
@@ -116,6 +117,7 @@ bool TCPProxy::forwardrecv(const void *sendbuf, const size_t sendcount,
 	/*combine flags as value to be returned*/
 	return sent_bool && recv_bool;
 }
+/* end add */
 
 bool TCPProxy::teardown() {
 
