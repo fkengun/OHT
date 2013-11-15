@@ -374,6 +374,8 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 
 	recv(infd, my_buf, my_msz, 0);
         printf("received something\n");
+        
+        close(svrSock);
 
 	/*...parse status and result*/
 	string sstatus;
