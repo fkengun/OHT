@@ -342,7 +342,7 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 
 	if (bind(svrSock, (struct sockaddr*) &svrAdd_in, sizeof(struct sockaddr))
 			< 0) {
-		perror("bind error\n");
+		perror("bind error");
 	}
 
 	if (listen(svrSock, 5) < 0) {

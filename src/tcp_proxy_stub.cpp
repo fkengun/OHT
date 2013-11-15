@@ -88,6 +88,34 @@ bool TCPProxy::sendrecv(const void *sendbuf, const size_t sendcount,
 	return sent_bool && recv_bool;
 }
 
+bool TCPProxy::forwardrecv(const void *sendbuf, const size_t sendcount,
+		void *recvbuf, size_t &recvcount) {
+
+	/*get client sock fd*/
+	ZHTUtil zu;
+	string msg((char*) sendbuf, sendcount);
+	HostEntity he = zu.getServerEntityByKey(msg);
+        printf("OHT: Server ip: %s, port: %d\n", he.host.c_str(), he.port);
+
+	int sock = getSockCached(he.host, he.port);
+
+	reuseSock(sock);
+
+	/*get mutex to protected shared socket*/
+	pthread_mutex_t *sock_mutex = getSockMutex(he.host, he.port);
+	lock_guard lock(sock_mutex);
+
+	/*send message to server over client sock fd*/
+	int sentSize = sendTo(sock, sendbuf, sendcount);
+	int sent_bool = sentSize == sendcount;
+
+	/*receive response from server over client sock fd*/
+	recvcount = recvFrom(sock, recvbuf);
+	int recv_bool = recvcount >= 0;
+
+	/*combine flags as value to be returned*/
+	return sent_bool && recv_bool;
+}
 
 bool TCPProxy::teardown() {
 

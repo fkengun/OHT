@@ -33,6 +33,9 @@
 
 #include "ZProcessor.h"
 #include "proxy_stub.h"
+/* added by fk for OHT */
+#include "ZHTUtil.h"
+/* end add */
 
 using namespace iit::datasys::zht::dm;
 
@@ -47,8 +50,11 @@ public:
 	virtual void process(const int& fd, const char * const buf, sockaddr sender);
 
 private:
-        void forward(ProtoAddr addr, const void *recvbuf);
+        void forward(ProtoAddr addr, const void *recvbuf); // added by fk for OHT
+        void getClientEntityBySock(int sock, HostEntity& he); // added by fk for OHT
+
 	ProtoStub *_stub;
+        ProtoProxy *_proxy; // added by fk for OHT, proxy node needs both stub and proxy
 };
 
 #endif /* IPRPOXY_H_ */

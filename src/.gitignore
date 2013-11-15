@@ -1,4 +1,5 @@
 *.o
 *.so
+*.a
 .DS_Store
 Thumbs.db

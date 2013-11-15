@@ -62,6 +62,22 @@ HostEntity ZHTUtil::getHostEntityByKey(const string& msg) {
 
 }
 
+/* added by fk for OHT, used in proxy to locate the server */
+HostEntity ZHTUtil::getServerEntityByKey(const string& msg) {
+
+	ZPack zpack;
+	zpack.ParseFromString(msg); //to debug
+
+	uint64_t hascode = HashUtil::genHash(zpack.key());
+	size_t node_size = ConfHandler::ServerVector.size();
+	int index = hascode % node_size;
+
+	ConfEntry ce = ConfHandler::ServerVector.at(index);
+
+	return buildHostEntity(ce.name(), atoi(ce.value().c_str()));
+
+}
+
 HostEntity ZHTUtil::buildHostEntity(const string& host, const uint& port) {
 
 	HostEntity he;

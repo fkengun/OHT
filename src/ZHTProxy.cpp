@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
 	string novohtDbFile;
 
 	int c;
-	while ((c = getopt(argc, argv, "z:n:p:f:h")) != -1) {
+	while ((c = getopt(argc, argv, "z:n:s:p:f:h")) != -1) {
 		switch (c) {
 		case 'z':
 			zhtConf = string(optarg);

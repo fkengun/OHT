@@ -33,9 +33,12 @@
 #include  "ProxyStubFactory.h"
 
 /* added by fk for OHT */
+#include "Env.h"
+#include "Const.h"
 #include "ZHTUtil.h"
 #include "zpack.pb.h"
 #include "ip_proxy_stub.h"
+#include "bigdata_transfer.h"
 #include <netdb.h>
 #include <sys/socket.h>
 #include <iostream>
@@ -50,7 +53,8 @@ using namespace std;
 using namespace iit::datasys::zht::dm;
 
 IPProxy::IPProxy() :
-_stub(ProxyStubFactory::createStub()) {
+_stub(ProxyStubFactory::createStub()),
+_proxy(ProxyStubFactory::createProxy()) {
 }
 
 IPProxy::~IPProxy() {
@@ -60,6 +64,12 @@ IPProxy::~IPProxy() {
         delete _stub;
         _stub = NULL;
     }
+    if (_proxy != NULL) {
+
+        delete _proxy;
+        _proxy = NULL;
+    }
+
 }
 
 void IPProxy::process(const int& fd, const char * const buf, sockaddr sender) {
@@ -83,7 +93,7 @@ void IPProxy::process(const int& fd, const char * const buf, sockaddr sender) {
 
 void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     //printf("OHT: forward invoked\n");
-    printf("\nOHT: recvbuf: %s\n\n", recvbuf);
+    //printf("\nOHT: recvbuf: %s\n\n", recvbuf);
 
     string recvstr((char *) recvbuf);
     ZPack zpack;
@@ -92,14 +102,16 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     /* send an acknowledge to client */
     string result("result");
     _stub->sendBack(addr, result.data(), result.size());
-    
+
     /* calculate the dest server*/
     zpack.ParseFromString(recvstr);
     string key = zpack.key();
-    HostEntity he = zu.getHostEntityByKey(recvstr);
-    printf("OHT: Host: %s, port: %d\n", he.host.c_str(), he.port);
+    HostEntity he = zu.getServerEntityByKey(recvstr);
+    cout << "OHT: Forward to server: " << he.host.c_str() << ", port: " << he.port << endl;
 
     /* connect with server */
+    //    int sock = getSockCached(he.host, he.port);
+    //    reuseSock(sock);
     struct sockaddr_in dest;
     memset(&dest, 0, sizeof (struct sockaddr_in)); /*zero the struct*/
     dest.sin_family = PF_INET; /*storing the server info in sockaddr_in structure*/
@@ -137,17 +149,48 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
             sizeof (reuse_addr));
     if (ret < 0) {
-        cerr << "resuse socket failed: [" << sock << "], " << endl;
+        cerr << "reuse socket failed: [" << sock << "], " << endl;
         return;
-    } else
-        return;
-    
+    }
+
     /* add IP address and port to zpack msg */
-    zpack.set_client_ip(he.host);
-    zpack.set_client_port(he.port);
-    
+    HostEntity client;
+    getClientEntityBySock(addr.fd, client);
+    zpack.set_client_ip(client.host);
+    zpack.set_client_port(client.port);
+
     /* forward the request to server */
     recvstr = zpack.SerializeAsString();
-    _stub->sendBack(addr, recvstr.c_str(), recvstr.size());
+    char *buf = (char*) calloc(Env::get_msg_maxsize(), sizeof (char));
+    size_t msz = Env::get_msg_maxsize();
+    _proxy->forwardrecv(recvstr.c_str(), recvstr.size(), buf, msz);
+
+    free(buf);
+    cout << "OHT: Request has been forward to server successfully" << endl;
+}
+
+void IPProxy::getClientEntityBySock(int sock, HostEntity& he) {
+    socklen_t len;
+    struct sockaddr_storage addr;
+    char ipstr[INET6_ADDRSTRLEN];
+    int port;
+
+    len = sizeof addr;
+    getpeername(sock, (struct sockaddr*) &addr, &len);
+
+    // deal with both IPv4 and IPv6:
+    if (addr.ss_family == AF_INET) {
+        struct sockaddr_in *s = (struct sockaddr_in *) &addr;
+        port = ntohs(s->sin_port);
+        inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
+    } else { // AF_INET6
+        struct sockaddr_in6 *s = (struct sockaddr_in6 *) &addr;
+        port = ntohs(s->sin6_port);
+        inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
+    }
+    
+    he.host = string(ipstr);
+    he.port = port;
+    //printf("Peer IP address: %s, port: %d\n", ipstr, port);
 }
 
