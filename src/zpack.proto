@@ -9,4 +9,5 @@ message ZPack{
 	optional int32 replicanum = 8;	
         optional bytes client_ip = 9; //used by OHT
         optional int32 client_port = 10; //used by OHT
+        optional int32 seq_num = 11; //used by OHT
 }

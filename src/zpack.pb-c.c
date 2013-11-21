@@ -49,7 +49,7 @@ void   zpack__free_unpacked
   PROTOBUF_C_ASSERT (message->base.descriptor == &zpack__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-static const ProtobufCFieldDescriptor zpack__field_descriptors[10] =
+static const ProtobufCFieldDescriptor zpack__field_descriptors[11] =
 {
   {
     "opcode",
@@ -171,6 +171,18 @@ static const ProtobufCFieldDescriptor zpack__field_descriptors[10] =
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "seq_num",
+    11,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    PROTOBUF_C_OFFSETOF(ZPack, has_seq_num),
+    PROTOBUF_C_OFFSETOF(ZPack, seq_num),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned zpack__field_indices_by_name[] = {
   8,   /* field[8] = client_ip */
@@ -181,13 +193,14 @@ static const unsigned zpack__field_indices_by_name[] = {
   6,   /* field[6] = newvalnull */
   0,   /* field[0] = opcode */
   7,   /* field[7] = replicanum */
+  10,   /* field[10] = seq_num */
   2,   /* field[2] = val */
   5,   /* field[5] = valnull */
 };
 static const ProtobufCIntRange zpack__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 10 }
+  { 0, 11 }
 };
 const ProtobufCMessageDescriptor zpack__descriptor =
 {
@@ -197,7 +210,7 @@ const ProtobufCMessageDescriptor zpack__descriptor =
   "ZPack",
   "",
   sizeof(ZPack),
-  10,
+  11,
   zpack__field_descriptors,
   zpack__field_indices_by_name,
   1,  zpack__number_ranges,

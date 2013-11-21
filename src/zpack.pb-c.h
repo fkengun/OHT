@@ -39,10 +39,12 @@ struct  _ZPack
   ProtobufCBinaryData client_ip;
   protobuf_c_boolean has_client_port;
   int32_t client_port;
+  protobuf_c_boolean has_seq_num;
+  int32_t seq_num;
 };
 #define ZPACK__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&zpack__descriptor) \
-    , 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,0, 0,0, 0,0, 0,{0,NULL}, 0,0 }
+    , 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,0, 0,0, 0,0, 0,{0,NULL}, 0,0, 0,0 }
 
 
 /* ZPack methods */
