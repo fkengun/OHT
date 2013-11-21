@@ -70,13 +70,14 @@ HostEntity ZHTUtil::getServerEntityByKey(const string& msg) {
 
 	uint64_t hascode = HashUtil::genHash(zpack.key());
 	size_t node_size = ConfHandler::ServerVector.size();
+        cout << node_size << endl;
 	int index = hascode % node_size;
 
 	ConfEntry ce = ConfHandler::ServerVector.at(index);
 
 	return buildHostEntity(ce.name(), atoi(ce.value().c_str()));
-
 }
+/* end add */
 
 HostEntity ZHTUtil::buildHostEntity(const string& host, const uint& port) {
 

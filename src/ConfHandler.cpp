@@ -154,12 +154,14 @@ void ConfHandler::setNeighborSeeds(const string& neighborCfg) {
 	setNeighborVector(NeighborVector);
 }
 
+/* added by fk for OHT */
 void ConfHandler::setServerSeeds(const string& serverCfg) {
 
 	setParametersInternal(serverCfg, ServerSeeds);
 
 	setServerVector(ServerVector);
 }
+/* end add */
 
 void ConfHandler::setZHTParameters(const string& zhtConfig) {
 
@@ -224,6 +226,7 @@ void ConfHandler::setNeighborVector(VEC &neighborVector) {
 	}
 }
 
+/* added by fk for OHT */
 void ConfHandler::setServerVector(VEC &serverVector) {
 
 	ConfHandler::MIT kvi;
@@ -234,6 +237,7 @@ void ConfHandler::setServerVector(VEC &serverVector) {
 		serverVector.push_back(kvi->second);
 	}
 }
+/* end add */
 
 void ConfHandler::pickNodeParameters() {
 

@@ -93,7 +93,7 @@ void IPProxy::process(const int& fd, const char * const buf, sockaddr sender) {
 
 void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     //printf("OHT: forward invoked\n");
-    //printf("\nOHT: recvbuf: %s\n\n", recvbuf);
+    printf("\nOHT: recvbuf: %s\n\n", recvbuf);
 
     string recvstr((char *) recvbuf);
     ZPack zpack;
