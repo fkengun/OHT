@@ -93,7 +93,7 @@ void IPProxy::process(const int& fd, const char * const buf, sockaddr sender) {
 
 void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     //printf("OHT: forward invoked\n");
-    printf("\nOHT: recvbuf: %s\n\n", recvbuf);
+    //printf("\nOHT: recvbuf: %s\n\n", recvbuf);
 
     string recvstr((char *) recvbuf);
     ZPack zpack;
@@ -102,18 +102,19 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     /* send an acknowledge to client */
     string result("result");
     _stub->sendBack(addr, result.data(), result.size());
+    cout << "OHT: an ack has been sent back to client" << endl;
 
     /* calculate the dest server */
     zpack.ParseFromString(recvstr);
     HostEntity he = zu.getServerEntityByKey(recvstr);
-    cout << "OHT: Forward to server: " << he.host.c_str() << ", port: " << he.port << endl;
+    cout << "OHT: Forwarding to server: " << he.host.c_str() << ", port: " << he.port << endl;
 
     /* connect with server */
     //    int sock = getSockCached(he.host, he.port);
     //    reuseSock(sock);
     struct sockaddr_in dest;
     memset(&dest, 0, sizeof (struct sockaddr_in)); /*zero the struct*/
-    dest.sin_family = PF_INET; /*storing the server info in sockaddr_in structure*/
+    dest.sin_family = AF_INET; /*storing the server info in sockaddr_in structure*/
     dest.sin_port = htons(he.port);
 
     struct hostent * hinfo = gethostbyname(he.host.c_str());
@@ -164,6 +165,9 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
 
     free(buf);
     cout << "OHT: Request has been forward to server successfully" << endl;
+
+    close(sock);
+    cout << "OHT: socket has been closed" << endl;
 }
 
 void IPProxy::getClientEntityBySock(int sock, HostEntity& he) {

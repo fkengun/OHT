@@ -74,9 +74,13 @@ void IPServer::process(const int& fd, const char * const buf, sockaddr sender) {
 
     string bufstr(buf);
     /* added by fk for OHT*/
+    string result("result");
+    _stub->sendBack(pa, result.data(), result.size());
     respond(bufstr.c_str(), pa);
     /* end add */
     _stub->recvsend(pa, bufstr.c_str());
+
+    close(pa.fd);
 }
 
 void IPServer::respond(const char * const buf, ProtoAddr& addr) {

@@ -51,7 +51,7 @@ HTWorker.o StrTokenizer.o
 	$(CC) $(CCFLAGS) -o $@ $^ $(LIBFLAGS)
 	
 
-zht_ben: benchmark_client.o lock_guard.o cpp_zhtclient.o meta.pb-c.o lru_cache.o meta.pb.o zpack.pb.o novoht.o bigdata_transfer.o\
+zht_ben: benchmark_client.o lock_guard.o cpp_zhtclient.o meta.pb-c.o lru_cache.o meta.pb.o zpack.pb.o novoht.o bigdata_transfer.o client_map_value.o\
 Const.o ConfHandler.o ConfEntry.o \
 ProxyStubFactory.o proxy_stub.o ip_proxy_stub.o mq_proxy_stub.o ipc_plus.o tcp_proxy_stub.o udp_proxy_stub.o \
 ZHTUtil.o Env.o Util.o \
@@ -96,6 +96,8 @@ c_zhtclient_test.o: c_zhtclient_test.c
 cpp_zhtclient_test.o: cpp_zhtclient_test.cpp
 benchmark_client.o: benchmark_client.cpp
 cpp_zhtclient.o: cpp_zhtclient.cpp
+client_map_value.o: client_map_value.cpp
+
 
 c_zhtclient.o: c_zhtclient.cpp
 c_zhtclientStd.o: c_zhtclientStd.cpp
@@ -135,6 +137,7 @@ ip_server.o: ip_server.cpp
 ip_proxy.o: ip_proxy.cpp
 HTWorker.o: HTWorker.cpp
 StrTokenizer.o: StrTokenizer.cpp
+
 
 .PHONY:	clean
 

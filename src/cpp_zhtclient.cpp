@@ -37,12 +37,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <pthread.h>
 
 #include "zpack.pb.h"
 #include "ConfHandler.h"
 #include "Env.h"
 #include "StrTokenizer.h"
-
+#include <map>
 using namespace iit::datasys::zht::dm;
 
 ZHTClient::ZHTClient() :
@@ -72,6 +73,11 @@ int ZHTClient::init(const string& zhtConf, const string& neighborConf) {
 
 	_proxy = ProxyStubFactory::createProxy();
 
+
+	pthread_t id1;
+	pthread_create(&id1, NULL, ZHTClient::listeningSocket, NULL);
+
+
 	if (_proxy == 0)
 		return -1;
 	else
@@ -84,7 +90,7 @@ int ZHTClient::init(const char *zhtConf, const char *neighborConf) {
 	string sneighborconf(neighborConf);
 
 	int rc = init(szhtconf, sneighborconf);
-
+	sem_init(&mutex,0,1);
 	return rc;
 }
 
@@ -275,13 +281,66 @@ int ZHTClient::state_change_callback(const char *key, const char *expeded_val,
 	return rc;
 }
 
+// oht: thread for a server socket
+void * ZHTClient::listeningSocket(void *) {
+	int port = 55555;
+	struct sockaddr_in svrAdd_in;
+	int svrSock = -1;
+	printf("success 1\n");
+	memset(&svrAdd_in, 0, sizeof(struct sockaddr_in));
+	svrAdd_in.sin_family = AF_INET;
+	svrAdd_in.sin_addr.s_addr = INADDR_ANY;
+	svrAdd_in.sin_port = htons(port);
+	printf("success 2\n");
+	svrSock = socket(AF_INET, SOCK_STREAM, 0);
+	printf("success 3\n");
+	printf("svrSock: %d\n", svrSock);
+
+	if (bind(svrSock, (struct sockaddr*) &svrAdd_in, sizeof(struct sockaddr))
+			< 0) {
+		perror("bind error");
+	}
+	printf("bind \n");
+
+	if (listen(svrSock, 5) < 0) {
+		printf("listen error\n");
+	}
+	printf("listen \n");
+
+	/* make the socket reusable */
+	int reuse_addr = 1;
+	int ret = setsockopt(svrSock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
+			sizeof(reuse_addr));
+	if (ret < 0) {
+		cerr << "reuse socket failed: [" << svrSock << "], " << endl;
+		return NULL;
+	}
+
+	sockaddr *in_addr = (sockaddr *) calloc(1, sizeof(struct sockaddr));
+	socklen_t in_len = sizeof(struct sockaddr);
+	int infd;
+	char *my_buf = (char*) calloc(Env::get_msg_maxsize(), sizeof(char));
+	size_t my_msz = Env::get_msg_maxsize();
+
+	while (true) {
+		infd = accept(svrSock, in_addr, &in_len);
+		printf("accept \n");
+
+		recv(infd, my_buf, my_msz, 0);
+		printf("received something\n");
+	}
+
+	close(svrSock);
+	close(infd);
+	printf("OHT: listen socket is closed\n");
+}
+
 string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 		const string &val, const string &val2, string &result, int lease) {
 
 	ZPack zpack;
 	zpack.set_opcode(opcode); //"001": lookup, "002": remove, "003": insert, "004": append, "005", compare_swap
 	zpack.set_replicanum(3);
-
 	if (key.empty())
 		return Const::ZSC_REC_EMPTYKEY; //-1, empty key not allowed.
 	else
@@ -296,7 +355,8 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 		zpack.set_val(val);
 		zpack.set_valnull(false);
 	}
-
+	printf("yes\n");
+	printf("yes\n");
 	if (val2.empty()) {
 
 		zpack.set_newval("?"); //coup, to fix ridiculous bug of protobuf! //to debug
@@ -310,6 +370,7 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 	zpack.set_lease(Const::toString(lease));
 
 	string msg = zpack.SerializeAsString();
+
 
 	/*ZPack tmp;
 	 tmp.ParseFromString(msg);
@@ -327,55 +388,26 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 	// 1. send and recv
 	_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
 	// 2. set up a server socket
-	int port = 55555;
-	struct sockaddr_in svrAdd_in;
-	int svrSock = -1;
 
-	memset(&svrAdd_in, 0, sizeof(struct sockaddr_in));
-	svrAdd_in.sin_family = AF_INET;
-	svrAdd_in.sin_addr.s_addr = INADDR_ANY;
-	svrAdd_in.sin_port = htons(port);
+	//	// 3. wait for a connection
+	//	if (infd == -1) {
+	//
+	//		free(in_addr);
+	//
+	//		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+	//
+	//			/* We have processed all incoming connections. */
+	//			break;
+	//		} else {
+	//
+	//			perror("accept");
+	//			break;
+	//		}
+	//	}
 
-	svrSock = socket(AF_INET, SOCK_STREAM, 0);
 
-	printf("svrSock: %d\n", svrSock);
-
-	if (bind(svrSock, (struct sockaddr*) &svrAdd_in, sizeof(struct sockaddr))
-			< 0) {
-		perror("bind error");
-	}
-
-	if (listen(svrSock, 5) < 0) {
-		printf("listen error\n");
-	}
-
-	sockaddr *in_addr = (sockaddr *) calloc(1, sizeof(struct sockaddr));
-	socklen_t in_len = sizeof(struct sockaddr);
-	int infd = accept(svrSock, in_addr, &in_len);
-
-//	// 3. wait for a connection
-//	if (infd == -1) {
-//
-//		free(in_addr);
-//
-//		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-//
-//			/* We have processed all incoming connections. */
-//			break;
-//		} else {
-//
-//			perror("accept");
-//			break;
-//		}
-//	}
 	// 4. receive message from the
-	char *my_buf = (char*) calloc(_msg_maxsize, sizeof(char));
-	size_t my_msz = _msg_maxsize;
 
-	recv(infd, my_buf, my_msz, 0);
-        printf("received something\n");
-        
-        close(svrSock);
 
 	/*...parse status and result*/
 	string sstatus;
@@ -396,6 +428,8 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 }
 
 int ZHTClient::teardown() {
+
+	sleep(3); // added by fk for OHT, just for test
 
 	if (_proxy->teardown())
 		return 0;

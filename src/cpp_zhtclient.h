@@ -39,7 +39,9 @@ using namespace std;
 #include "lru_cache.h"
 
 #include "ProxyStubFactory.h"
-
+#include <semaphore.h>
+#include <sys/types.h>
+#include "client_map_value.h"
 /*
  *
  */
@@ -70,6 +72,7 @@ public:
 	int state_change_callback(const char *key, const char *expeded_val,
 			int lease);
 	int teardown();
+	static void * listeningSocket(void * );
 private:
 	int commonOp(const string &opcode, const string &key, const string &val,
 			const string &val2, string &result, int lease);
@@ -79,7 +82,8 @@ private:
 
 private:
 	ProtoProxy *_proxy;
-
+	sem_t mutex;
+	map<int, Client_map_value> requestMap;
 	int _msg_maxsize;
 };
 
