@@ -73,7 +73,7 @@ int ZHTClient::init(const string& zhtConf, const string& neighborConf) {
 
 	_proxy = ProxyStubFactory::createProxy();
 
-
+	requestMap[0]=0;
 	pthread_t id1;
 	pthread_create(&id1, NULL, ZHTClient::listeningSocket, NULL);
 
@@ -295,7 +295,7 @@ void * ZHTClient::listeningSocket(void *) {
 	svrSock = socket(AF_INET, SOCK_STREAM, 0);
 	printf("success 3\n");
 	printf("svrSock: %d\n", svrSock);
-
+	//ZHTClient::requestMap[2]=1;
 	if (bind(svrSock, (struct sockaddr*) &svrAdd_in, sizeof(struct sockaddr))
 			< 0) {
 		perror("bind error");
@@ -325,8 +325,10 @@ void * ZHTClient::listeningSocket(void *) {
 	while (true) {
 		infd = accept(svrSock, in_addr, &in_len);
 		printf("accept \n");
-
 		recv(infd, my_buf, my_msz, 0);
+		string s(my_buf);
+
+		//printf("%d\n",Const::toInt(s.substr(0,3)));
 		printf("received something\n");
 	}
 
@@ -355,8 +357,6 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 		zpack.set_val(val);
 		zpack.set_valnull(false);
 	}
-	printf("yes\n");
-	printf("yes\n");
 	if (val2.empty()) {
 
 		zpack.set_newval("?"); //coup, to fix ridiculous bug of protobuf! //to debug
@@ -387,6 +387,7 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 	//_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
 	// 1. send and recv
 	_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
+	printf("oht send recv :%s\n",buf);
 	// 2. set up a server socket
 
 	//	// 3. wait for a connection

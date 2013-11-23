@@ -83,7 +83,8 @@ private:
 private:
 	ProtoProxy *_proxy;
 	sem_t mutex;
-	map<int, Client_map_value> requestMap;
+	//map<int, Client_map_value> requestMap;
+	map<int, int> requestMap;
 	int _msg_maxsize;
 };
 
