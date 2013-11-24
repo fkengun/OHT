@@ -38,6 +38,8 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include <pthread.h>
+#include "bigdata_transfer.h"
+/* end add */
 
 #include "zpack.pb.h"
 #include "ConfHandler.h"
@@ -326,9 +328,11 @@ void * ZHTClient::listeningSocket(void *) {
 		infd = accept(svrSock, in_addr, &in_len);
 		printf("accept \n");
 		recv(infd, my_buf, my_msz, 0);
-		string s(my_buf);
-
-		//printf("%d\n",Const::toInt(s.substr(0,3)));
+		
+                BdRecvBase *pbrb = new BdRecvFromServer();
+                bool ready = false;
+                string bd = pbrb->getBdStr(NULL, my_buf, my_msz, ready);
+		printf("%d\n",Const::toInt(bd.substr(0,3)));
 		printf("received something\n");
 	}
 

@@ -314,8 +314,8 @@ bool TCPStub::recvsend(ProtoAddr addr, const void *recvbuf) {
 #else
 	HTWorker htw;
 #endif
-
-	string result = htw.run(recvstr.c_str());
+        
+	string result = htw.run(recvstr.data());
 
 #ifdef SCCB
 	return true;
