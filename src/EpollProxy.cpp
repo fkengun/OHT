@@ -500,7 +500,7 @@ void EpollProxy::serve() {
 						} else {
 
 #ifdef BIG_MSG
-							printf("OHT: Using BIG_MSG %d, %s, %s\n", __LINE__, __FILE__, __func__);
+							//printf("OHT: Using BIG_MSG %d, %s, %s\n", __LINE__, __FILE__, __func__);
 							bool ready = false;
 							string bd = pbrb->getBdStr(sfd, buf, count, ready);
 							//cout << "OHT: raw string received: " << bd << endl; 
@@ -508,12 +508,12 @@ void EpollProxy::serve() {
 							if (ready) {
 
 #ifdef THREADED_SERVE
-								printf("OHT: Using THREADED_SERVE %d, %s, %s\n", __LINE__, __FILE__, __func__);
+								//printf("OHT: Using THREADED_SERVE %d, %s, %s\n", __LINE__, __FILE__, __func__);
 								EventData eventData(edata->fd(), bd.c_str(), bd.size(),
 										*edata->sender());
 								_eventQueue.push(eventData);
 #else
-								printf("OHT: Not using THREADED_SERVE %d, %s, %s\n", __LINE__, __FILE__, __func__);
+								//printf("OHT: Not using THREADED_SERVE %d, %s, %s\n", __LINE__, __FILE__, __func__);
 								_ZProcessor->process(edata->fd(), bd.c_str(),
 										*edata->sender());
 #endif
@@ -521,14 +521,14 @@ void EpollProxy::serve() {
 #endif
 
 #ifdef SML_MSG
-							printf("OHT: Using SML_MSG %d, %s, %s\n", __LINE__, __FILE__, __func__);
+							//printf("OHT: Using SML_MSG %d, %s, %s\n", __LINE__, __FILE__, __func__);
 #ifdef THREADED_SERVE
-							printf("OHT: Using THREADED_SERVE %d, %s, %s\n", __LINE__, __FILE__, __func__);
+							//printf("OHT: Using THREADED_SERVE %d, %s, %s\n", __LINE__, __FILE__, __func__);
 							EventData eventData(edata->fd(), buf, sizeof(buf),
 									*edata->sender());
 							_eventQueue.push(eventData);
 #else
-							printf("OHT: Not using THREADED_SERVE %d, %s, %s\n", __LINE__, __FILE__, __func__);
+							//printf("OHT: Not using THREADED_SERVE %d, %s, %s\n", __LINE__, __FILE__, __func__);
 							string bufstr(buf);
 							_ZProcessor->process(edata->fd(), bufstr.c_str(),
 									*edata->sender());

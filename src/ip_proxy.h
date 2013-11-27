@@ -55,6 +55,7 @@ private:
 
 	ProtoStub *_stub;
         ProtoProxy *_proxy; // added by fk for OHT, proxy node needs both stub and proxy
+        int count;
 };
 
 #endif /* IPRPOXY_H_ */

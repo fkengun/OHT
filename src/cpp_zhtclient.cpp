@@ -321,19 +321,44 @@ void * ZHTClient::listeningSocket(void *) {
 	sockaddr *in_addr = (sockaddr *) calloc(1, sizeof(struct sockaddr));
 	socklen_t in_len = sizeof(struct sockaddr);
 	int infd;
-	char *my_buf = (char*) calloc(Env::get_msg_maxsize(), sizeof(char));
-	size_t my_msz = Env::get_msg_maxsize();
+	//char *my_buf = (char*) calloc(Env::(), sizeof(char));
+	//size_t my_msz = Env::get_msg_maxsize();
+	char *my_buf = (char*) calloc(100, sizeof(char));
+	size_t my_msz = 100;
+	int counter =0;
+
+
+
+
+
 
 	while (true) {
 		infd = accept(svrSock, in_addr, &in_len);
-		printf("accept \n");
+
+
+		/* make the socket reusable */
+		int client_reuse = 1;
+		int client_ret = setsockopt(infd, SOL_SOCKET, SO_REUSEADDR, &client_reuse,
+				sizeof(client_reuse));
+		if (client_ret < 0) {
+			cerr << "reuse socket failed: [" << infd << "], " << endl;
+			return NULL;
+		}
+
+
+
+		//printf("accept \n");
 		recv(infd, my_buf, my_msz, 0);
-		
+		printf("OHT :: %d",infd);
                 BdRecvBase *pbrb = new BdRecvFromServer();
                 bool ready = false;
                 string bd = pbrb->getBdStr(NULL, my_buf, my_msz, ready);
-		printf("%d\n",Const::toInt(bd.substr(0,3)));
-		printf("received something\n");
+		//printf("%d\n",Const::toInt(bd.substr(0,3)));
+		//printf("received something\n");
+               // printf("thread counter %d\n",counter++);
+
+
+        close(infd);
 	}
 
 	close(svrSock);

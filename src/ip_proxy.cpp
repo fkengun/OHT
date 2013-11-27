@@ -55,6 +55,7 @@ using namespace iit::datasys::zht::dm;
 IPProxy::IPProxy() :
 _stub(ProxyStubFactory::createStub()),
 _proxy(ProxyStubFactory::createProxy()) {
+	count = 0;
 }
 
 IPProxy::~IPProxy() {
@@ -102,12 +103,12 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     /* send an acknowledge to client */
     string result("result");
     _stub->sendBack(addr, result.data(), result.size());
-    cout << "OHT: an ack has been sent back to client" << endl;
+    cout << "OHT: an ack: " << count++ << " has been sent back to client"  << endl;
 
     /* calculate the dest server */
     zpack.ParseFromString(recvstr);
     HostEntity he = zu.getServerEntityByKey(recvstr);
-    cout << "OHT: Forwarding to server: " << he.host.c_str() << ", port: " << he.port << endl;
+    //cout << "OHT: Forwarding to server: " << he.host.c_str() << ", port: " << he.port << endl;
 
     /* connect with server */
     //    int sock = getSockCached(he.host, he.port);
@@ -164,10 +165,10 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     _proxy->recvforward(recvstr.c_str(), recvstr.size(), buf, msz);
 
     free(buf);
-    cout << "OHT: Request has been forward to server successfully" << endl;
+    //cout << "OHT: Request has been forward to server successfully" << endl;
 
     close(sock);
-    cout << "OHT: socket has been closed" << endl;
+    //cout << "OHT: socket has been closed" << endl;
 }
 
 void IPProxy::getClientEntityBySock(int sock, HostEntity& he) {

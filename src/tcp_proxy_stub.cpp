@@ -96,7 +96,7 @@ bool TCPProxy::recvforward(const void *sendbuf, const size_t sendcount,
 	ZHTUtil zu;
 	string msg((char*) sendbuf, sendcount);
 	HostEntity he = zu.getServerEntityByKey(msg);
-        printf("OHT: Server ip: %s, port: %d\n", he.host.c_str(), he.port);
+        //printf("OHT: Server ip: %s, port: %d\n", he.host.c_str(), he.port);
 
 	int sock = getSockCached(he.host, he.port);
 
@@ -108,12 +108,12 @@ bool TCPProxy::recvforward(const void *sendbuf, const size_t sendcount,
 
 	/*send message to server over client sock fd*/
 	int sentSize = sendTo(sock, sendbuf, sendcount);
-	printf("OHT: send request to server\n");
+	//printf("OHT: send request to server\n");
 	int sent_bool = sentSize == sendcount;
 
 	/*receive response from server over client sock fd*/
 	recvcount = recvFrom(sock, recvbuf);
-	printf("OHT: recv ack from server\n");
+	//printf("OHT: recv ack from server\n");
 	int recv_bool = recvcount >= 0;
 
 	/*combine flags as value to be returned*/
