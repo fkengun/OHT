@@ -349,7 +349,7 @@ void * ZHTClient::listeningSocket(void *) {
 
 		//printf("accept \n");
 		recv(infd, my_buf, my_msz, 0);
-		printf("OHT :: %d",infd);
+		printf("OHT: sock is %d\n",infd);
                 BdRecvBase *pbrb = new BdRecvFromServer();
                 bool ready = false;
                 string bd = pbrb->getBdStr(NULL, my_buf, my_msz, ready);

@@ -88,7 +88,7 @@ void protobuf_AddDesc_zpack_2eproto() {
     "\014\022\r\n\005lease\030\005 \001(\014\022\017\n\007valnull\030\006 \001(\010\022\022\n\nnew"
     "valnull\030\007 \001(\010\022\022\n\nreplicanum\030\010 \001(\005\022\021\n\tcli"
     "ent_ip\030\t \001(\014\022\023\n\013client_port\030\n \001(\005\022\017\n\007seq"
-    "_num\030\013 \001(\005", 210);
+    "_num\030\013 \001(\003", 210);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "zpack.proto", &protobuf_RegisterTypes);
   ZPack::default_instance_ = new ZPack();
@@ -146,7 +146,7 @@ void ZPack::SharedCtor() {
   replicanum_ = 0;
   client_ip_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   client_port_ = 0;
-  seq_num_ = 0;
+  seq_num_ = GOOGLE_LONGLONG(0);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -235,7 +235,7 @@ void ZPack::Clear() {
       }
     }
     client_port_ = 0;
-    seq_num_ = 0;
+    seq_num_ = GOOGLE_LONGLONG(0);
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -394,13 +394,13 @@ bool ZPack::MergePartialFromCodedStream(
         break;
       }
       
-      // optional int32 seq_num = 11;
+      // optional int64 seq_num = 11;
       case 11: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_seq_num:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
                  input, &seq_num_)));
           set_has_seq_num();
         } else {
@@ -484,9 +484,9 @@ void ZPack::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(10, this->client_port(), output);
   }
   
-  // optional int32 seq_num = 11;
+  // optional int64 seq_num = 11;
   if (has_seq_num()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(11, this->seq_num(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(11, this->seq_num(), output);
   }
   
   if (!unknown_fields().empty()) {
@@ -559,9 +559,9 @@ void ZPack::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(10, this->client_port(), target);
   }
   
-  // optional int32 seq_num = 11;
+  // optional int64 seq_num = 11;
   if (has_seq_num()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(11, this->seq_num(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(11, this->seq_num(), target);
   }
   
   if (!unknown_fields().empty()) {
@@ -643,10 +643,10 @@ int ZPack::ByteSize() const {
           this->client_port());
     }
     
-    // optional int32 seq_num = 11;
+    // optional int64 seq_num = 11;
     if (has_seq_num()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
           this->seq_num());
     }
     

@@ -175,7 +175,7 @@ static const ProtobufCFieldDescriptor zpack__field_descriptors[11] =
     "seq_num",
     11,
     PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_INT32,
+    PROTOBUF_C_TYPE_INT64,
     PROTOBUF_C_OFFSETOF(ZPack, has_seq_num),
     PROTOBUF_C_OFFSETOF(ZPack, seq_num),
     NULL,

@@ -182,12 +182,12 @@ class ZPack : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 client_port() const;
   inline void set_client_port(::google::protobuf::int32 value);
   
-  // optional int32 seq_num = 11;
+  // optional int64 seq_num = 11;
   inline bool has_seq_num() const;
   inline void clear_seq_num();
   static const int kSeqNumFieldNumber = 11;
-  inline ::google::protobuf::int32 seq_num() const;
-  inline void set_seq_num(::google::protobuf::int32 value);
+  inline ::google::protobuf::int64 seq_num() const;
+  inline void set_seq_num(::google::protobuf::int64 value);
   
   // @@protoc_insertion_point(class_scope:ZPack)
  private:
@@ -225,8 +225,8 @@ class ZPack : public ::google::protobuf::Message {
   bool newvalnull_;
   ::google::protobuf::int32 replicanum_;
   ::std::string* client_ip_;
+  ::google::protobuf::int64 seq_num_;
   ::google::protobuf::int32 client_port_;
-  ::google::protobuf::int32 seq_num_;
   
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
@@ -681,7 +681,7 @@ inline void ZPack::set_client_port(::google::protobuf::int32 value) {
   client_port_ = value;
 }
 
-// optional int32 seq_num = 11;
+// optional int64 seq_num = 11;
 inline bool ZPack::has_seq_num() const {
   return (_has_bits_[0] & 0x00000400u) != 0;
 }
@@ -692,13 +692,13 @@ inline void ZPack::clear_has_seq_num() {
   _has_bits_[0] &= ~0x00000400u;
 }
 inline void ZPack::clear_seq_num() {
-  seq_num_ = 0;
+  seq_num_ = GOOGLE_LONGLONG(0);
   clear_has_seq_num();
 }
-inline ::google::protobuf::int32 ZPack::seq_num() const {
+inline ::google::protobuf::int64 ZPack::seq_num() const {
   return seq_num_;
 }
-inline void ZPack::set_seq_num(::google::protobuf::int32 value) {
+inline void ZPack::set_seq_num(::google::protobuf::int64 value) {
   set_has_seq_num();
   seq_num_ = value;
 }

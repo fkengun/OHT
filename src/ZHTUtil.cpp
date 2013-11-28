@@ -33,6 +33,9 @@
 #include "Util.h"
 #include "ConfHandler.h"
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include <arpa/inet.h>
 #include <algorithm>
 #include <netdb.h>
@@ -55,6 +58,7 @@ HostEntity ZHTUtil::getHostEntityByKey(const string& msg) {
 	uint64_t hascode = HashUtil::genHash(zpack.key());
 	size_t node_size = ConfHandler::NeighborVector.size();
 	int index = hascode % node_size;
+        printf("OHT: hashcode %" PRIu64 ", node_size %d, index %d\n", hascode, node_size, index);
 
 	ConfEntry ce = ConfHandler::NeighborVector.at(index);
 
@@ -71,6 +75,7 @@ HostEntity ZHTUtil::getServerEntityByKey(const string& msg) {
 	uint64_t hascode = HashUtil::genHash(zpack.key());
 	size_t node_size = ConfHandler::ServerVector.size();
 	int index = hascode % node_size;
+        printf("OHT: hashcode %" PRIu64 ", node_size %d, index %d\n", hascode, node_size, index);
 
 	ConfEntry ce = ConfHandler::ServerVector.at(index);
 

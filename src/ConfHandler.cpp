@@ -93,6 +93,13 @@ string ConfHandler::getPortFromConf() {
 	return get_zhtconf_parameter(Const::PROTO_PORT);
 }
 
+/* added by fk for OHT */
+string ConfHandler::getNumReplicaFromConf() {
+
+	return get_zhtconf_parameter(Const::ZC_NUM_REPLICAS);
+}
+/* end add */
+
 string ConfHandler::get_zhtconf_parameter(const string &paraname) {
 
 	string result;
@@ -210,6 +217,7 @@ void ConfHandler::setParametersInternal(string configFile, MAP& configMap) {
 
 		ConfEntry ce(one, two);
 		configMap.insert(PAIR(ce.toString(), ce)); //todo: use hash code to reduce size of key/value pair.
+                cout << "New parameter found " << ce.toString() << endl;
 	}
 
 	ifs.close();

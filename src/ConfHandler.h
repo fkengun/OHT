@@ -66,6 +66,7 @@ public:
         static void initProxyConf(string zhtConf, string neighborConf, string serverconf); // added by fk, for OHT
 	static string getPortFromConf();
 	static string getProtocolFromConf();
+        static string getNumReplicaFromConf(); // added by fk for OHT
 	static string get_zhtconf_parameter(const string &paraname);
 
 private:
