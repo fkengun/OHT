@@ -41,17 +41,17 @@ namespace zht {
 namespace dm {
 
 ConfEntry::ConfEntry() {
-
 }
 
 ConfEntry::ConfEntry(const string& sconfigEntry) {
 
 	assign(sconfigEntry);
+	_mark = 0;
 }
 
 ConfEntry::ConfEntry(const string& name, const string& value) :
 		_name(name), _value(value) {
-
+	_mark = 0;
 }
 
 ConfEntry::~ConfEntry() {
@@ -73,9 +73,26 @@ string ConfEntry::value() const {
 	return _value;
 }
 
+
 void ConfEntry::value(const string& value) {
 
 	_value = value;
+}
+
+// add by tianyang.
+int ConfEntry::mark() const {
+
+	return _mark;
+}
+
+
+bool ConfEntry::setMark(){
+	_mark = 1;
+}
+
+bool ConfEntry::resetMark(){
+
+	_mark = 0;
 }
 
 string ConfEntry::operator()() const {

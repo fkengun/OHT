@@ -55,6 +55,11 @@ public:
 	string value() const;
 	void value(const string& value);
 
+	// add by tianyang
+	int mark() const;
+	bool setMark();
+	bool resetMark();
+
 	string operator()() const;
 	string toString() const;
 	ConfEntry& assign(string sconfigEntry);
@@ -64,6 +69,8 @@ public:
 private:
 	string _name;
 	string _value;
+	// add by tianyang, 1 means mark
+	int _mark;
 };
 
 } /* namespace dm */

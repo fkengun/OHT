@@ -48,6 +48,8 @@ namespace dm {
 
 bool ConfHandler::BEEN_INIT = false;
 
+// revised by tianyang, NeighborVector is client's proxy 2-d list
+
 ConfHandler::VEC ConfHandler::NeighborVector = VEC();
 ConfHandler::MAP ConfHandler::NeighborSeeds = MAP();
 /* added by fk, variables for server list info */
@@ -56,6 +58,11 @@ ConfHandler::MAP ConfHandler::ServerSeeds = MAP();
 /* end add */
 ConfHandler::MAP ConfHandler::ZHTParameters = MAP();
 ConfHandler::MAP ConfHandler::NodeParameters = MAP();
+
+ConfHandler::MYTABLE ConfHandler::mytable;
+
+//ConfHandler::ConfEntry ConfHandler::mytable = new ConfEntry();
+
 
 string ConfHandler::CONF_ZHT = "zht.conf";
 string ConfHandler::CONF_NODE = "node.conf";
@@ -128,20 +135,29 @@ void ConfHandler::initConf(string zhtConf, string neighborConf) {
 
 		BEEN_INIT = true;
 	}
+
+	//	cout << "OHT:: confhandler works"
+	//			<< ConfHandler::mytable[0][0].toString() << endl;
+	//
+	//	ConfHandler::mytable[0][0].assign("name,value");
+	//
+	//	cout << "OHT:: confhandler works"
+	//			<< ConfHandler::mytable[0][0].toString() << endl;
 }
 
 /* similar with the default init function, add server list conf file */
-void ConfHandler::initProxyConf(string zhtConf, string neighborConf, string serverConf) {
+void ConfHandler::initProxyConf(string zhtConf, string neighborConf,
+		string serverConf) {
 
 	if (!BEEN_INIT) {
 
 		ConfHandler::CONF_ZHT = zhtConf; //zht.conf
 		ConfHandler::CONF_NEIGHBOR = neighborConf; //neighbor.conf
-                ConfHandler::CONF_SERVER = serverConf; //server.conf
+		ConfHandler::CONF_SERVER = serverConf; //server.conf
 
 		ConfHandler::setZHTParameters(zhtConf);
 		ConfHandler::setNeighborSeeds(neighborConf);
-                ConfHandler::setServerSeeds(serverConf);
+		ConfHandler::setServerSeeds(serverConf);
 
 		BEEN_INIT = true;
 	}
@@ -174,7 +190,7 @@ void ConfHandler::setNodeParameters(const string& nodeConfig) {
 
 	setParametersInternal(nodeConfig, NodeParameters);
 
-//	pickNodeParameters();
+	//	pickNodeParameters();
 }
 
 void ConfHandler::setParametersInternal(string configFile, MAP& configMap) {
@@ -207,7 +223,7 @@ void ConfHandler::setParametersInternal(string configFile, MAP& configMap) {
 
 		if (one.empty())
 			continue;
-
+		//cout<<"OHT confhandler buffer content      " << one <<"      "<< two << endl;
 		ConfEntry ce(one, two);
 		configMap.insert(PAIR(ce.toString(), ce)); //todo: use hash code to reduce size of key/value pair.
 	}
@@ -219,10 +235,19 @@ void ConfHandler::setNeighborVector(VEC &neighborVector) {
 
 	ConfHandler::MIT kvi;
 	ConfHandler::MAP* map = &ConfHandler::NeighborSeeds;
-
+	int row = 0;
+	int column = 0;
 	for (kvi = map->begin(); kvi != map->end(); kvi++) {
+		// cout << "OHT map iterator print   " <<kvi->first <<"    " <<endl;
+		ConfHandler::mytable[row][column].assign(kvi->second.toString());
 
+		//cout << "OHT 2D table content   " << ConfHandler::mytable[row][column].name() << "    "<<ConfHandler::mytable[row][column].value() <<endl;
+		if(++column==3){
+			column=0;
+			row++;
+		}
 		neighborVector.push_back(kvi->second);
+		//	ConfHandler::mytable[0][0].assign("name,value");
 	}
 }
 
