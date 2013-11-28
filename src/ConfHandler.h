@@ -55,8 +55,12 @@ public:
 	typedef MAP::reverse_iterator MRIT;
 
 	typedef vector<ConfEntry> VEC;
-	typedef VEC::iterator VIT;
-	typedef VEC::reverse_iterator VRIT;
+
+	typedef ConfEntry MYTABLE[3][3];
+	//typedef ConfEntry VEC[3][3];
+	//typedef VEC::iterator VIT;
+	//typedef VEC::reverse_iterator VRIT;
+
 
 public:
 	ConfHandler();
@@ -85,8 +89,9 @@ private:
 public:
 	static VEC NeighborVector;
 	static MAP NeighborSeeds;
+	static MYTABLE mytable;
         /* added by fk, variables for server list info */
-        static VEC ServerVector;
+    static VEC ServerVector;
 	static MAP ServerSeeds;
         /* end add */
 	static MAP ZHTParameters;
@@ -98,7 +103,7 @@ public:
 	static string CONF_ZHT;
 	static string CONF_NODE;
 	static string CONF_NEIGHBOR;
-        static string CONF_SERVER;      /* added by fk, for OHT */
+    static string CONF_SERVER;      /* added by fk, for OHT */
 	static string NOVOHT_FILE;
 
 public:
