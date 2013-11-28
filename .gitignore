@@ -16,3 +16,7 @@ src/zhtserver
 src/cpp_zhtclient_threaded_test
 src/c_zhtclient_lanl_threaded
 src/c_zhtclient_threaded_test
+
+# Project related #
+src/.cproject
+src/nbproject
