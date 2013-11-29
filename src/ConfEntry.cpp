@@ -41,17 +41,17 @@ namespace zht {
 namespace dm {
 
 ConfEntry::ConfEntry() {
-
 }
 
 ConfEntry::ConfEntry(const string& sconfigEntry) {
 
 	assign(sconfigEntry);
+	_mark = 0;
 }
 
 ConfEntry::ConfEntry(const string& name, const string& value) :
 		_name(name), _value(value) {
-
+	_mark = 0;
 }
 
 ConfEntry::~ConfEntry() {
@@ -73,9 +73,26 @@ string ConfEntry::value() const {
 	return _value;
 }
 
+
 void ConfEntry::value(const string& value) {
 
 	_value = value;
+}
+
+// add by tianyang.
+int ConfEntry::mark() const {
+
+	return _mark;
+}
+
+
+bool ConfEntry::setMark(){
+	_mark = 1;
+}
+
+bool ConfEntry::resetMark(){
+
+	_mark = 0;
 }
 
 string ConfEntry::operator()() const {
@@ -87,12 +104,26 @@ string ConfEntry::toString() const {
 
 	char buf[50];
 	memset(buf, 0, sizeof(buf));
-	int n = sprintf(buf, getFormat().c_str(), _name.c_str(), _value.c_str());
+	int n = sprintf(buf, getFormat().c_str(), _name.c_str(), _value.c_str()); // commented by fk for OHT
+//    int n = sprintf(buf, "%s,%s,%1d", _name.c_str(), _value.c_str(), _mark); // print mark along with
 
 	string result(buf, 0, n);
 
 	return result;
 }
+
+/* added by fk for OHT, print everything out including mark*/
+string ConfEntry::allToString() const {
+
+	char buf[50];
+	memset(buf, 0, sizeof(buf));
+    int n = sprintf(buf, "%s,%s,%1d", _name.c_str(), _value.c_str(), _mark); // print mark along with
+
+	string result(buf, 0, n);
+
+	return result;
+}
+/* end add */
 
 ConfEntry& ConfEntry::assign(string sconfigEntry) {
 

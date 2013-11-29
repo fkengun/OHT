@@ -58,7 +58,7 @@ HostEntity ZHTUtil::getHostEntityByKey(const string& msg) {
 	uint64_t hascode = HashUtil::genHash(zpack.key());
 	size_t node_size = ConfHandler::NeighborVector.size();
 	int index = hascode % node_size;
-        printf("OHT: hashcode %" PRIu64 ", node_size %d, index %d\n", hascode, node_size, index);
+	printf("OHT: hashcode %" PRIu64 ", node_size %d, index %d\n", hascode, node_size, index);
 
 	ConfEntry ce = ConfHandler::NeighborVector.at(index);
 
@@ -73,11 +73,11 @@ HostEntity ZHTUtil::getServerEntityByKey(const string& msg) {
 	zpack.ParseFromString(msg); //to debug
 
 	uint64_t hascode = HashUtil::genHash(zpack.key());
-	size_t node_size = ConfHandler::ServerVector.size();
+	size_t node_size = ConfHandler::PrimaryServerVector.size();
 	int index = hascode % node_size;
-        printf("OHT: hashcode %" PRIu64 ", node_size %d, index %d\n", hascode, node_size, index);
+	printf("OHT: hashcode %" PRIu64 ", node_size %d, index %d\n", hascode, node_size, index);
 
-	ConfEntry ce = ConfHandler::ServerVector.at(index);
+	ConfEntry ce = ConfHandler::PrimaryServerVector.at(index);
 
 	return buildHostEntity(ce.name(), atoi(ce.value().c_str()));
 }

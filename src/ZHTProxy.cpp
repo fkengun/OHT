@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
 	string port_from_conf;
 	string zhtConf;
 	string neighborConf;
-        string serverConf; // added by fk, server list conf file for OHT
+	string serverConf; // added by fk, server list conf file for OHT
 	string novohtDbFile;
 
 	int c;
@@ -68,11 +68,11 @@ int main(int argc, char **argv) {
 		case 'n':
 			neighborConf = string(optarg);
 			break;
-                /* added by fk, option for proxy in OHT */
-                case 's':
+		/* added by fk, option for proxy in OHT */
+		case 's':
 			serverConf = string(optarg);
 			break;
-                /* end add */
+		/* end add */
 		case 'p':
 			port_from_input = string(optarg);
 			break;
@@ -116,6 +116,12 @@ int main(int argc, char **argv) {
 
 			string port =
 					!port_from_input.empty() ? port_from_input : port_from_conf;
+
+            /* added by fk for OHT, split server vector into two parts */
+            ConfHandler::splitServerVector(port);
+            //ConfEntry ce("localhost,50002"); // for test vector update
+            ConfHandler::updateServerVector(ce);
+            /* end add */
 
 			if (port.empty()) {
 

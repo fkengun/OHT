@@ -53,7 +53,8 @@ bool ConfHandler::BEEN_INIT = false;
 ConfHandler::VEC ConfHandler::NeighborVector = VEC();
 ConfHandler::MAP ConfHandler::NeighborSeeds = MAP();
 /* added by fk, variables for server list info */
-ConfHandler::VEC ConfHandler::ServerVector = VEC();
+ConfHandler::VEC ConfHandler::PrimaryServerVector = VEC(); // servers that this proxy manages
+ConfHandler::VEC ConfHandler::ReplicaServerVector = VEC(); // servers that other proxies manage
 ConfHandler::MAP ConfHandler::ServerSeeds = MAP();
 /* end add */
 ConfHandler::MAP ConfHandler::ZHTParameters = MAP();
@@ -104,6 +105,69 @@ string ConfHandler::getPortFromConf() {
 string ConfHandler::getNumReplicaFromConf() {
 
 	return get_zhtconf_parameter(Const::ZC_NUM_REPLICAS);
+}
+
+void ConfHandler::splitServerVector(string myPort) {
+    int index = getIndexOfProxy(myPort);
+    if (index < 0)
+        exit(-1);
+    int replicaNum = atoi(getNumReplicaFromConf().c_str());
+    cout << "OHT: ReplicaServerVector size " << ReplicaServerVector.size() << endl;
+    int serverPerProxy = ReplicaServerVector.size() / NeighborVector.size();
+    cout << "OHT: serverPerProxy " << serverPerProxy << endl;
+
+    cout << "OHT: Replica server" << endl;
+    for (int i = 0; i < ReplicaServerVector.size(); i++)
+    cout << ReplicaServerVector[i].allToString() << endl;
+    cout << endl;
+
+    int offset = index * serverPerProxy;
+    for (int i = 0; i < serverPerProxy; i++) {
+        ConfEntry ce;
+        ce.assign(ReplicaServerVector[offset].toString());
+        PrimaryServerVector.push_back(ce);
+        ReplicaServerVector.erase(ReplicaServerVector.begin() + offset);
+    }
+
+    cout << "OHT: Primary server" << endl;
+    for (int i = 0; i < PrimaryServerVector.size(); i++)
+    cout << PrimaryServerVector[i].allToString() << endl;
+    cout << endl;
+
+    cout << "OHT: Replica server" << endl;
+    for (int i = 0; i < ReplicaServerVector.size(); i++)
+    cout << ReplicaServerVector[i].allToString() << endl;
+    cout << endl;
+}
+
+void ConfHandler::updateServerVector(ConfEntry faultyServer) {
+    ConfEntry ce;
+
+    for (int i = 0; i < ReplicaServerVector.size(); i++) {
+        ce.assign(ReplicaServerVector[i].toString());
+        if (ce.name() == faultyServer.name() && 
+            ce.value() == faultyServer.value()) {
+            cout << "OHT: status of faulty server " << faultyServer.allToString() << " updated" << endl;
+            ReplicaServerVector[i].setMark();
+        }
+    }
+    
+    cout << "OHT: Replica server" << endl;
+    for (int i = 0; i < ReplicaServerVector.size(); i++)
+    cout << ReplicaServerVector[i].allToString() << endl;
+    cout << endl;
+}
+
+int ConfHandler::getIndexOfProxy(string myPort) {
+    for (int index = 0; index < NeighborVector.size(); index++) {
+        if (NeighborVector[index].value() == myPort) {
+            cout << "OHT: found my port " << NeighborVector[index].allToString() << ", at " << index << endl;
+            return index;
+        }
+    }
+
+    return -1;
+
 }
 /* end add */
 
@@ -182,7 +246,7 @@ void ConfHandler::setServerSeeds(const string& serverCfg) {
 
 	setParametersInternal(serverCfg, ServerSeeds);
 
-	setServerVector(ServerVector);
+	setServerVector(ReplicaServerVector);
 }
 /* end add */
 
@@ -233,7 +297,7 @@ void ConfHandler::setParametersInternal(string configFile, MAP& configMap) {
 		//cout<<"OHT confhandler buffer content      " << one <<"      "<< two << endl;
 		ConfEntry ce(one, two);
 		configMap.insert(PAIR(ce.toString(), ce)); //todo: use hash code to reduce size of key/value pair.
-                cout << "New parameter found " << ce.toString() << endl;
+		cout << "New parameter found " << ce.toString() << endl;
 	}
 
 	ifs.close();
@@ -260,14 +324,16 @@ void ConfHandler::setNeighborVector(VEC &neighborVector) {
 }
 
 /* added by fk for OHT */
-void ConfHandler::setServerVector(VEC &serverVector) {
+void ConfHandler::setServerVector(VEC &replicaServerVector) {
 
 	ConfHandler::MIT kvi;
 	ConfHandler::MAP* map = &ConfHandler::ServerSeeds;
 
+    cout << "OHT: replica num " << ConfHandler::getNumReplicaFromConf() << endl;
+
 	for (kvi = map->begin(); kvi != map->end(); kvi++) {
 
-		serverVector.push_back(kvi->second);
+		replicaServerVector.push_back(kvi->second);
 	}
 }
 /* end add */

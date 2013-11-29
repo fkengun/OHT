@@ -58,8 +58,8 @@ public:
 
 	typedef ConfEntry MYTABLE[3][3];
 	//typedef ConfEntry VEC[3][3];
-	//typedef VEC::iterator VIT;
-	//typedef VEC::reverse_iterator VRIT;
+	typedef VEC::iterator VIT;
+	typedef VEC::reverse_iterator VRIT;
 
 
 public:
@@ -67,18 +67,21 @@ public:
 	virtual ~ConfHandler();
 
 	static void initConf(string zhtConf, string neighborConf);
-        static void initProxyConf(string zhtConf, string neighborConf, string serverconf); // added by fk, for OHT
+	static void initProxyConf(string zhtConf, string neighborConf, string serverconf); // added by fk, for OHT
 	static string getPortFromConf();
 	static string getProtocolFromConf();
-        static string getNumReplicaFromConf(); // added by fk for OHT
+	static string getNumReplicaFromConf(); // added by fk for OHT
+    static void splitServerVector(string myPort); // added by fk for OHT, split all servers into primaryservervector and replicaservervector
+    static int getIndexOfProxy(string myPort); // added by fk for OHT, find index of self in neighbors
+    static void updateServerVector(ConfEntry faultyServer); // added by fk for OHT, mark faulty server in replica server vector
 	static string get_zhtconf_parameter(const string &paraname);
 
 private:
 	static void setNeighborSeeds(const string& neighborCfg);
-        static void setServerSeeds(const string& serverCfg); // added by fk, for OHT
+	static void setServerSeeds(const string& serverCfg); // added by fk, for OHT
 	static void setZHTParameters(const string& zhtConfig);
 	static void setNeighborVector(VEC &neighborVector);
-        static void setServerVector(VEC &neighborVector); // added by fk, for OHT
+	static void setServerVector(VEC &replicaServerVector); // added by fk, for OHT
 	static void setNodeParameters(const string& nodeConfig);
 
 	static void pickNodeParameters();
@@ -90,10 +93,11 @@ public:
 	static VEC NeighborVector;
 	static MAP NeighborSeeds;
 	static MYTABLE mytable;
-        /* added by fk, variables for server list info */
-    static VEC ServerVector;
+	/* added by fk, variables for server list info */
+    static VEC PrimaryServerVector;
+    static VEC ReplicaServerVector;
 	static MAP ServerSeeds;
-        /* end add */
+	/* end add */
 	static MAP ZHTParameters;
 	static MAP NodeParameters;
 

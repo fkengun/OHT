@@ -62,6 +62,7 @@ public:
 
 	string operator()() const;
 	string toString() const;
+        string allToString() const;
 	ConfEntry& assign(string sconfigEntry);
 
 	static string getFormat();
