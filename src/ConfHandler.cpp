@@ -113,31 +113,32 @@ void ConfHandler::splitServerVector(string myPort) {
         exit(-1);
     int replicaNum = atoi(getNumReplicaFromConf().c_str());
     cout << "OHT: ReplicaServerVector size " << ReplicaServerVector.size() << endl;
-    int serverPerProxy = ReplicaServerVector.size() / NeighborVector.size();
+    int serverPerProxy = ReplicaServerVector.size() / NeighborVector.size() * replicaNum;
     cout << "OHT: serverPerProxy " << serverPerProxy << endl;
 
-    cout << "OHT: Replica server" << endl;
-    for (int i = 0; i < ReplicaServerVector.size(); i++)
-    cout << ReplicaServerVector[i].allToString() << endl;
-    cout << endl;
+//    cout << "OHT: Replica server" << endl;
+//    for (int i = 0; i < ReplicaServerVector.size(); i++)
+//        cout << ReplicaServerVector[i].allToString() << endl;
+//    cout << endl;
 
-    int offset = index * serverPerProxy;
+    int offset = (index / replicaNum) * serverPerProxy;
     for (int i = 0; i < serverPerProxy; i++) {
         ConfEntry ce;
         ce.assign(ReplicaServerVector[offset].toString());
+        cout << "OHT: servers under me " << ce.toString() << endl;
         PrimaryServerVector.push_back(ce);
         ReplicaServerVector.erase(ReplicaServerVector.begin() + offset);
     }
-
-    cout << "OHT: Primary server" << endl;
-    for (int i = 0; i < PrimaryServerVector.size(); i++)
-    cout << PrimaryServerVector[i].allToString() << endl;
-    cout << endl;
-
-    cout << "OHT: Replica server" << endl;
-    for (int i = 0; i < ReplicaServerVector.size(); i++)
-    cout << ReplicaServerVector[i].allToString() << endl;
-    cout << endl;
+//
+//    cout << "OHT: Primary server" << endl;
+//    for (int i = 0; i < PrimaryServerVector.size(); i++)
+//        cout << PrimaryServerVector[i].allToString() << endl;
+//    cout << endl;
+//
+//    cout << "OHT: Replica server" << endl;
+//    for (int i = 0; i < ReplicaServerVector.size(); i++)
+//        cout << ReplicaServerVector[i].allToString() << endl;
+//    cout << endl;
 }
 
 void ConfHandler::updateServerVector(ConfEntry faultyServer) {
@@ -147,14 +148,14 @@ void ConfHandler::updateServerVector(ConfEntry faultyServer) {
         ce.assign(ReplicaServerVector[i].toString());
         if (ce.name() == faultyServer.name() && 
             ce.value() == faultyServer.value()) {
-            cout << "OHT: status of faulty server " << faultyServer.allToString() << " updated" << endl;
             ReplicaServerVector[i].setMark();
+            cout << "OHT: status of faulty server " << faultyServer.allToString() << " updated" << endl;
         }
     }
     
     cout << "OHT: Replica server" << endl;
     for (int i = 0; i < ReplicaServerVector.size(); i++)
-    cout << ReplicaServerVector[i].allToString() << endl;
+        cout << ReplicaServerVector[i].allToString() << endl;
     cout << endl;
 }
 
@@ -297,7 +298,7 @@ void ConfHandler::setParametersInternal(string configFile, MAP& configMap) {
 		//cout<<"OHT confhandler buffer content      " << one <<"      "<< two << endl;
 		ConfEntry ce(one, two);
 		configMap.insert(PAIR(ce.toString(), ce)); //todo: use hash code to reduce size of key/value pair.
-		cout << "New parameter found " << ce.toString() << endl;
+//		cout << "New parameter found " << ce.toString() << endl;
 	}
 
 	ifs.close();

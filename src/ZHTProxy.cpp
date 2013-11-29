@@ -119,8 +119,9 @@ int main(int argc, char **argv) {
 
             /* added by fk for OHT, split server vector into two parts */
             ConfHandler::splitServerVector(port);
-            //ConfEntry ce("localhost,50002"); // for test vector update
-            ConfHandler::updateServerVector(ce);
+            // test vector update
+//            ConfEntry ce("localhost,50002");
+//            ConfHandler::updateServerVector(ce);
             /* end add */
 
 			if (port.empty()) {
