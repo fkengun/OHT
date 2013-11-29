@@ -36,6 +36,7 @@
 #include "Env.h"
 #include "Const.h"
 #include "ZHTUtil.h"
+#include "ConfEntry.h"
 #include "zpack.pb.h"
 #include "ip_proxy_stub.h"
 #include "bigdata_transfer.h"
@@ -92,6 +93,7 @@ void IPProxy::process(const int& fd, const char * const buf, sockaddr sender) {
     forward(pa, bufstr.c_str());
 }
 
+/* added by fk for OHT */
 void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     //printf("OHT: forward invoked\n");
     //printf("\nOHT: recvbuf: %s\n\n", recvbuf);
@@ -99,6 +101,18 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     string recvstr((char *) recvbuf);
     ZPack zpack;
     ZHTUtil zu;
+    
+    /* update server vector when receive a special zapck */
+    string opcode = zpack.opcode();
+    if (opcode == Const::ZSC_OPC_SRVUPDT) {
+        string entry_str = zpack.client_ip();
+        entry_str += ",";
+        entry_str += zpack.client_port();
+        ConfEntry ce;
+        ce.assign(entry_str);
+        cout << "OHT: receive update msg for " << ce.toString() << endl;
+        ConfHandler::updateServerVector(ce);
+    }
 
     /* send an acknowledge to client */
     string result("result");

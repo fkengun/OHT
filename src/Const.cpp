@@ -101,6 +101,7 @@ const string Const::ZSC_OPC_INSERT = "003";
 const string Const::ZSC_OPC_APPEND = "004";
 const string Const::ZSC_OPC_CMPSWP = "005";
 const string Const::ZSC_OPC_STCHGCB = "006";
+const string Const::ZSC_OPC_SRVUPDT = "007"; // added by fk for OHT
 const string Const::ZSC_OPC_BRDDN_GMEM = "087";
 const string Const::ZSC_OPC_OPR_CANCEL = "088";
 const string Const::ZSC_OPC_GET_ASNGHB = "089";

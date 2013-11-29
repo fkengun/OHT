@@ -167,6 +167,7 @@ public:
 	static const string ZSC_OPC_APPEND; //append item
 	static const string ZSC_OPC_CMPSWP; //compare and swap item
 	static const string ZSC_OPC_STCHGCB; //state change call back
+    static const string ZSC_OPC_SRVUPDT; // added by fk for OHT, update server vector
 	static const string ZSC_OPC_BRDDN_GMEM; //broadcast global membership done
 	static const string ZSC_OPC_OPR_CANCEL; //cancle an operation
 	static const string ZSC_OPC_GET_ASNGHB; //get information of ZHTNode as a neighbor
