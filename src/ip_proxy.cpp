@@ -36,7 +36,7 @@
 #include "Env.h"
 #include "Const.h"
 #include "ZHTUtil.h"
-#include "ConfEntry.h"
+#include "ConfHandler.h"
 #include "zpack.pb.h"
 #include "ip_proxy_stub.h"
 #include "bigdata_transfer.h"
@@ -56,7 +56,8 @@ using namespace iit::datasys::zht::dm;
 IPProxy::IPProxy() :
 _stub(ProxyStubFactory::createStub()),
 _proxy(ProxyStubFactory::createProxy()) {
-	count = 0;
+    count = 0;
+    local_port = "";
 }
 
 IPProxy::~IPProxy() {
@@ -87,6 +88,11 @@ void IPProxy::process(const int& fd, const char * const buf, sockaddr sender) {
     pa.fd = fd;
     pa.sender = calloc(1, sizeof (sockaddr));
     memcpy(pa.sender, &sender, sizeof (sockaddr));
+    
+    /* added by fk for OHT, set local port */
+    if (local_port.length() == 0)
+        local_port = getLocalPort(fd);
+    /* end add */
 
     string bufstr(buf);
     //_stub->recvsend(pa, bufstr.c_str()); // commented by fk for hierarchical proxy
@@ -101,17 +107,27 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     string recvstr((char *) recvbuf);
     ZPack zpack;
     ZHTUtil zu;
-    
+
     /* update server vector when receive a special zapck */
+    zpack.ParseFromString(recvstr);
     string opcode = zpack.opcode();
     if (opcode == Const::ZSC_OPC_SRVUPDT) {
         string entry_str = zpack.client_ip();
         entry_str += ",";
-        entry_str += zpack.client_port();
+        char p_port[10];
+        sprintf(p_port, "%d", zpack.client_port());
+        entry_str += p_port;
         ConfEntry ce;
         ce.assign(entry_str);
         cout << "OHT: receive update msg for " << ce.toString() << endl;
-        ConfHandler::updateServerVector(ce);
+        ConfHandler::updateServerVector(ce, ConfHandler::ReplicaServerVector);
+        ConfHandler::updateServerVector(ce, ConfHandler::ReplicaServerVector);
+        /* send an acknowledge to original proxy */
+        string result("result");
+        _stub->sendBack(addr, result.data(), result.size());
+        cout << "OHT: an ack has been sent back to original proxy"  << endl;
+        
+        return;
     }
 
     /* send an acknowledge to client */
@@ -125,46 +141,61 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     //cout << "OHT: Forwarding to server: " << he.host.c_str() << ", port: " << he.port << endl;
 
     /* connect with server */
-    //    int sock = getSockCached(he.host, he.port);
-    //    reuseSock(sock);
-    struct sockaddr_in dest;
-    memset(&dest, 0, sizeof (struct sockaddr_in)); /*zero the struct*/
-    dest.sin_family = AF_INET; /*storing the server info in sockaddr_in structure*/
-    dest.sin_port = htons(he.port);
-
-    struct hostent * hinfo = gethostbyname(he.host.c_str());
-    if (hinfo == NULL) {
-        cerr << "TCPProxy::makeClientSocket(): ";
-        herror(he.host.c_str());
-        return;
-    }
-
-    memcpy(&dest.sin_addr, hinfo->h_addr, sizeof (dest.sin_addr));
-
-    int sock = socket(PF_INET, SOCK_STREAM, 0); //try change here.................................................
-
+    int sock = _proxy->makeClientSocket(he.host, he.port);
     if (sock < 0) {
-        cerr << "TCPProxy::makeClientSocket(): error on ::socket(...): "
-                << endl;
-        return;
+        /* send update msg to other proxies when fails to connect a server */
+        cout << "OHT: find failure server " << he.host << ", " << he.port << endl;
+        ConfEntry ce;
+        char p_port[10];
+        sprintf(p_port, "%d", he.port);
+        string portStr = p_port;
+        ce.name(he.host);
+        ce.value(portStr);
+        ConfHandler::updateServerVector(ce, ConfHandler::PrimaryServerVector);
+        bcastServerUpdate(he.host, he.port);
     }
-
-    int ret_con = connect(sock, (struct sockaddr *) &dest, sizeof (sockaddr));
-
-    if (ret_con < 0) {
-        cerr << "TCPProxy::makeClientSocket(): error on ::connect(...): "
-                << endl;
-        return;
-    }
-
-    /* make the socket reusable */
-    int reuse_addr = 1;
-    int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
-            sizeof (reuse_addr));
-    if (ret < 0) {
-        cerr << "reuse socket failed: [" << sock << "], " << endl;
-        return;
-    }
+    _proxy->reuseSock(sock);
+    //    struct sockaddr_in dest;
+    //    memset(&dest, 0, sizeof (struct sockaddr_in)); /*zero the struct*/
+    //    dest.sin_family = AF_INET; /*storing the server info in sockaddr_in structure*/
+    //    dest.sin_port = htons(he.port);
+    //
+    //    struct hostent * hinfo = gethostbyname(he.host.c_str());
+    //    if (hinfo == NULL) {
+    //        cerr << "TCPProxy::makeClientSocket(): ";
+    //        herror(he.host.c_str());
+    //        return;
+    //    }
+    //
+    //    memcpy(&dest.sin_addr, hinfo->h_addr, sizeof (dest.sin_addr));
+    //
+    //    int sock = socket(PF_INET, SOCK_STREAM, 0); //try change here.................................................
+    //
+    //    if (sock < 0) {
+    //        cerr << "TCPProxy::makeClientSocket(): error on ::socket(...): "
+    //                << endl;
+    //        return;
+    //    }
+    //
+    //    int ret_con = connect(sock, (struct sockaddr *) &dest, sizeof (sockaddr));
+    //
+    //    if (ret_con < 0) {
+    //        cerr << "TCPProxy::makeClientSocket(): error on ::connect(...): "
+    //                << endl;
+    //        /* send update msg to other proxies when fails to connect a server */
+    //        bcastServerUpdate(he.host, he.port);
+    //        
+    //        return;
+    //    }
+    //
+    //    /* make the socket reusable */
+    //    int reuse_addr = 1;
+    //    int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
+    //            sizeof (reuse_addr));
+    //    if (ret < 0) {
+    //        cerr << "reuse socket failed: [" << sock << "], " << endl;
+    //        return;
+    //    }
 
     /* add IP address and port to zpack msg */
     HostEntity client;
@@ -204,9 +235,79 @@ void IPProxy::getClientEntityBySock(int sock, HostEntity& he) {
         port = ntohs(s->sin6_port);
         inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
     }
-    
+
     he.host = string(ipstr);
     he.port = port;
     //printf("Peer IP address: %s, port: %d\n", ipstr, port);
 }
 
+void IPProxy::bcastServerUpdate(string ip, int port) {
+    ZPack zpack;
+
+    zpack.set_opcode(Const::ZSC_OPC_SRVUPDT);
+    zpack.set_client_ip(ip.c_str());
+    zpack.set_client_port(port);
+    string msg = zpack.SerializeAsString();
+
+    int sock;
+    char *buf = (char*) calloc(Env::get_msg_maxsize(), sizeof (char));
+    size_t msz = Env::get_msg_maxsize();
+    int selfIdx = ConfHandler::getIndexOfProxy(this->local_port);
+    cout << "OHT: my index in neighbor list is " << selfIdx << endl;
+    for (int i = 0; i < ConfHandler::NeighborVector.size(); i++) {
+        if (i == selfIdx)
+            continue;
+
+        string neighborIp;
+        int neighborPort;
+        getAddrFromConfEntry(ConfHandler::NeighborVector[i], neighborIp, neighborPort);
+        sock = _proxy->makeClientSocket(neighborIp, neighborPort);
+        if (sock >= 0) { 
+            _proxy->reuseSock(sock);
+            cout << "OHT: create sock with " << neighborIp << ", " << neighborPort << " succeed" << endl;
+            BdSendBase *pbsb = new BdSendToServer((char*) msg.c_str());
+            int sentSize = pbsb->bsend(sock);
+            delete pbsb;
+            pbsb = NULL;
+
+            //prompt errors
+            if (sentSize < msg.length()) {
+
+                //todo: bug prone
+                /*cerr << "TCPProxy::sendTo(): error on BdSendToServer::bsend(...): "
+                 << strerror(errno) << endl;*/
+            }
+        } else {
+            cout << "OHT: create sock with " << neighborIp << ", " << neighborPort << " fails" << endl;
+        }
+        
+        close(sock);
+    }
+    free(buf);
+}
+
+string IPProxy::getLocalPort(int sock) {
+    struct sockaddr_in sin;
+    socklen_t addrlen = sizeof (sin);
+    if (getsockname(sock, (struct sockaddr *) &sin, &addrlen) == 0 &&
+            sin.sin_family == AF_INET &&
+            addrlen == sizeof (sin)) {
+        int port = ntohs(sin.sin_port);
+        printf("OHT: local port is %d\n", port);
+        char p_port[10];
+        sprintf(p_port, "%d", port);
+        string portStr = p_port;
+        return portStr;
+    } else
+        ; // handle error
+}
+
+void IPProxy::getAddrFromConfEntry(ConfEntry ce, string &ip, int &port) {
+    cout << "OHT: get addr info for " << ce.toString() << " ..." << endl;
+    string entryStr = ce.toString();
+    string delimiter = ",";
+    ip = entryStr.substr(0, entryStr.find(delimiter));
+    if (ip == "localhost")
+        ip = "127.0.0.1";
+    port = atoi(entryStr.substr(entryStr.find(delimiter) + 1).c_str());
+}

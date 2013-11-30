@@ -41,6 +41,7 @@ namespace zht {
 namespace dm {
 
 ConfEntry::ConfEntry() {
+    _mark = 0;
 }
 
 ConfEntry::ConfEntry(const string& sconfigEntry) {

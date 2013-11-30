@@ -67,6 +67,7 @@ bool TCPProxy::sendrecv(const void *sendbuf, const size_t sendcount,
 	ZHTUtil zu;
 	string msg((char*) sendbuf, sendcount);
 	HostEntity he = zu.getHostEntityByKey(msg);
+    printf("OHT: destination %s,%d\n", he.host.c_str(), he.port);
 
 	int sock = getSockCached(he.host, he.port);
 
@@ -96,7 +97,7 @@ bool TCPProxy::recvforward(const void *sendbuf, const size_t sendcount,
 	ZHTUtil zu;
 	string msg((char*) sendbuf, sendcount);
 	HostEntity he = zu.getServerEntityByKey(msg);
-        //printf("OHT: Server ip: %s, port: %d\n", he.host.c_str(), he.port);
+    //printf("OHT: Server ip: %s, port: %d\n", he.host.c_str(), he.port);
 
 	int sock = getSockCached(he.host, he.port);
 

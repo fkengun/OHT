@@ -73,7 +73,7 @@ public:
 	static string getNumReplicaFromConf(); // added by fk for OHT
     static void splitServerVector(string myPort); // added by fk for OHT, split all servers into primaryservervector and replicaservervector
     static int getIndexOfProxy(string myPort); // added by fk for OHT, find index of self in neighbors
-    static void updateServerVector(ConfEntry faultyServer); // added by fk for OHT, mark faulty server in replica server vector
+    static void updateServerVector(ConfEntry faultyServer, VEC &serverVector); // added by fk for OHT, mark faulty server in replica server vector
 	static string get_zhtconf_parameter(const string &paraname);
 
 private:

@@ -141,25 +141,26 @@ void ConfHandler::splitServerVector(string myPort) {
 //    cout << endl;
 }
 
-void ConfHandler::updateServerVector(ConfEntry faultyServer) {
+void ConfHandler::updateServerVector(ConfEntry faultyServer, VEC &serverVector) {
     ConfEntry ce;
 
-    for (int i = 0; i < ReplicaServerVector.size(); i++) {
-        ce.assign(ReplicaServerVector[i].toString());
+    for (int i = 0; i < serverVector.size(); i++) {
+        ce.assign(serverVector[i].toString());
         if (ce.name() == faultyServer.name() && 
             ce.value() == faultyServer.value()) {
-            ReplicaServerVector[i].setMark();
+            serverVector[i].setMark();
             cout << "OHT: status of faulty server " << faultyServer.allToString() << " updated" << endl;
         }
     }
     
-    cout << "OHT: Replica server" << endl;
-    for (int i = 0; i < ReplicaServerVector.size(); i++)
-        cout << ReplicaServerVector[i].allToString() << endl;
+    cout << "OHT: server list" << endl;
+    for (int i = 0; i < serverVector.size(); i++)
+        cout << serverVector[i].allToString() << endl;
     cout << endl;
 }
 
 int ConfHandler::getIndexOfProxy(string myPort) {
+    cout << "OHT: get index for " << myPort << endl;
     for (int index = 0; index < NeighborVector.size(); index++) {
         if (NeighborVector[index].value() == myPort) {
             cout << "OHT: found my port " << NeighborVector[index].allToString() << ", at " << index << endl;
@@ -168,7 +169,6 @@ int ConfHandler::getIndexOfProxy(string myPort) {
     }
 
     return -1;
-
 }
 /* end add */
 

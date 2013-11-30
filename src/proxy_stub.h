@@ -32,6 +32,10 @@
 #define PROXY_STUB_H_
 
 #include <sys/types.h>
+/* added by fk for OHT */
+#include <string>
+using namespace std;
+/* end add */
 
 #include "protocol_shared.h"
 
@@ -60,11 +64,14 @@ public:
 
 	virtual bool sendrecv(const void *sendbuf, const size_t sendcount,
 			void *recvbuf, size_t &recvcount);
-        
-        /* added by fk for OHT */
-        virtual bool recvforward(const void *sendbuf, const size_t sendcount,
-			void *recvbuf, size_t &recvcount);
-        /* end add */
+
+    /* added by fk for OHT */
+    virtual bool recvforward(const void *sendbuf, const size_t sendcount,
+            void *recvbuf, size_t &recvcount);
+    virtual int getSockCached(const string& host, const uint& port);
+	virtual int makeClientSocket(const string& host, const uint& port);
+    virtual int reuseSock(int sock); // moved by fk for OHT
+    /* end add */
 
 	virtual bool teardown();
 };

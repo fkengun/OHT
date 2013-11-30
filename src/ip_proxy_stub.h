@@ -51,13 +51,13 @@ public:
 	virtual ~IPProtoProxy();
 	virtual bool teardown();
 
+    virtual int getSockCached(const string& host, const uint& port) = 0; // moved by fk for OHT
+	virtual int makeClientSocket(const string& host, const uint& port) = 0; // moved by fk for OHT
+    int reuseSock(int sock); // moved by fk for OHT
 protected:
-	virtual int getSockCached(const string& host, const uint& port) = 0;
-	virtual int makeClientSocket(const string& host, const uint& port) = 0;
+	
 	virtual int recvFrom(int sock, void* recvbuf) = 0;
 	virtual int loopedrecv(int sock, string &srecv) = 0;
-
-	virtual int reuseSock(int sock);
 
 	virtual pthread_mutex_t* getSockMutex(const string& host, const uint& port);
 	virtual void putSockMutex(const string& host, const uint& port);

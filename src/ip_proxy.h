@@ -34,6 +34,7 @@
 #include "ZProcessor.h"
 #include "proxy_stub.h"
 /* added by fk for OHT */
+#include "ConfEntry.h"
 #include "ZHTUtil.h"
 /* end add */
 
@@ -42,20 +43,24 @@ using namespace iit::datasys::zht::dm;
 /*
  *
  */
-class IPProxy: public ZProcessor {
+class IPProxy : public ZProcessor {
 public:
-	IPProxy();
-	virtual ~IPProxy();
+    IPProxy();
+    virtual ~IPProxy();
 
-	virtual void process(const int& fd, const char * const buf, sockaddr sender);
+    virtual void process(const int& fd, const char * const buf, sockaddr sender);
 
 private:
-        void forward(ProtoAddr addr, const void *recvbuf); // added by fk for OHT
-        void getClientEntityBySock(int sock, HostEntity& he); // added by fk for OHT
+    void forward(ProtoAddr addr, const void *recvbuf); // added by fk for OHT
+    void getClientEntityBySock(int sock, HostEntity& he); // added by fk for OHT
+    void bcastServerUpdate(string ip, int port); // added by fk for OHT
+    string getLocalPort(int sock); // added by fk for OHT
+    void getAddrFromConfEntry(ConfEntry ce, string &ip, int &port); // added by fk for OHT
 
-	ProtoStub *_stub;
-        ProtoProxy *_proxy; // added by fk for OHT, proxy node needs both stub and proxy
-        int count;
+    ProtoStub *_stub;
+    ProtoProxy *_proxy; // added by fk for OHT, proxy node needs both stub and proxy
+    string local_port; // added by fk for OHT, when bcast server update, ignore self
+    int count;
 };
 
 #endif /* IPRPOXY_H_ */

@@ -350,9 +350,9 @@ void * ZHTClient::listeningSocket(void *) {
 		//printf("accept \n");
 		recv(infd, my_buf, my_msz, 0);
 		printf("OHT: sock is %d\n",infd);
-                BdRecvBase *pbrb = new BdRecvFromServer();
-                bool ready = false;
-                string bd = pbrb->getBdStr(NULL, my_buf, my_msz, ready);
+        BdRecvBase *pbrb = new BdRecvFromServer();
+        bool ready = false;
+        string bd = pbrb->getBdStr(NULL, my_buf, my_msz, ready);
 		//printf("%d\n",Const::toInt(bd.substr(0,3)));
 		//printf("received something\n");
                // printf("thread counter %d\n",counter++);
@@ -416,28 +416,7 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 	//_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
 	// 1. send and recv
 	_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
-	printf("oht send recv :%s\n",buf);
-	// 2. set up a server socket
-
-	//	// 3. wait for a connection
-	//	if (infd == -1) {
-	//
-	//		free(in_addr);
-	//
-	//		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-	//
-	//			/* We have processed all incoming connections. */
-	//			break;
-	//		} else {
-	//
-	//			perror("accept");
-	//			break;
-	//		}
-	//	}
-
-
-	// 4. receive message from the
-
+	printf("OHT: send recv buf %s\n", buf);
 
 	/*...parse status and result*/
 	string sstatus;

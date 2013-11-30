@@ -83,6 +83,18 @@ bool ProtoProxy::recvforward(const void *sendbuf, const size_t sendcount,
 
 	return false;
 }
+
+int ProtoProxy::getSockCached(const string& host, const uint& port) {
+    return -1;
+}
+
+int ProtoProxy::makeClientSocket(const string& host, const uint& port) {
+    return -1;
+}
+
+int ProtoProxy::reuseSock(int sock) {
+    return -1;
+}
 /* end add */
 
 bool ProtoProxy::teardown() {

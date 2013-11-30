@@ -41,46 +41,48 @@ using namespace std;
 /*
  *
  */
-class TCPProxy: public IPProtoProxy {
+class TCPProxy : public IPProtoProxy {
 public:
-	typedef map<string, int> MAP;
-	typedef MAP::iterator MIT;
+    typedef map<string, int> MAP;
+    typedef MAP::iterator MIT;
 
 public:
-	TCPProxy();
-	virtual ~TCPProxy();
+    TCPProxy();
+    virtual ~TCPProxy();
 
-	virtual bool sendrecv(const void *sendbuf, const size_t sendcount,
-			void *recvbuf, size_t &recvcount);
-        /* added by fk for OHT, get host from server list instead of neighbor list */
-        virtual bool recvforward(const void *sendbuf, const size_t sendcount,
-			void *recvbuf, size_t &recvcount);
-        /* end add */
-	virtual bool teardown();
+    virtual bool sendrecv(const void *sendbuf, const size_t sendcount,
+            void *recvbuf, size_t &recvcount);
+    /* added by fk for OHT, get host from server list instead of neighbor list */
+    virtual bool recvforward(const void *sendbuf, const size_t sendcount,
+            void *recvbuf, size_t &recvcount);
+    /* end add */
+    virtual bool teardown();
+
+    virtual int getSockCached(const string& host, const uint& port); // moved by fk for OHT
+    virtual int makeClientSocket(const string& host, const uint& port); // moved by fk for OHT
 protected:
-	virtual int getSockCached(const string& host, const uint& port);
-	virtual int makeClientSocket(const string& host, const uint& port);
-	virtual int recvFrom(int sock, void* recvbuf);
-	virtual int loopedrecv(int sock, string &srecv);
+
+    virtual int recvFrom(int sock, void* recvbuf);
+    virtual int loopedrecv(int sock, string &srecv);
 
 private:
-	int sendTo(int sock, const void* sendbuf, int sendcount);
+    int sendTo(int sock, const void* sendbuf, int sendcount);
 
 private:
-	//static MAP CONN_CACHE;
-	MAP CONN_CACHE;
+    //static MAP CONN_CACHE;
+    MAP CONN_CACHE;
 };
 
-class TCPStub: public IPProtoStub {
+class TCPStub : public IPProtoStub {
 public:
-	TCPStub();
-	virtual ~TCPStub();
+    TCPStub();
+    virtual ~TCPStub();
 
-	virtual bool recvsend(ProtoAddr addr, const void *recvbuf);
+    virtual bool recvsend(ProtoAddr addr, const void *recvbuf);
 
 public:
-	virtual int sendBack(ProtoAddr addr, const void* sendbuf,
-			int sendcount) const;
+    virtual int sendBack(ProtoAddr addr, const void* sendbuf,
+            int sendcount) const;
 
 };
 
