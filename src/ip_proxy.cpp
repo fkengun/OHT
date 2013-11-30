@@ -37,6 +37,7 @@
 #include "Const.h"
 #include "ZHTUtil.h"
 #include "ConfEntry.h"
+#include "ConfHandler.h"
 #include "zpack.pb.h"
 #include "ip_proxy_stub.h"
 #include "bigdata_transfer.h"

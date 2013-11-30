@@ -31,18 +31,20 @@
 #include "cpp_zhtclient.h"
 
 #include  <stdlib.h>
+#include <string>
 #include <string.h>
-
 /* added by fk for OHT */
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <errno.h>
 #include <pthread.h>
+
 #include "bigdata_transfer.h"
 /* end add */
 
 #include "zpack.pb.h"
 #include "ConfHandler.h"
+#include "ZHTUtil.h"
 #include "Env.h"
 #include "StrTokenizer.h"
 #include <map>
@@ -75,10 +77,9 @@ int ZHTClient::init(const string& zhtConf, const string& neighborConf) {
 
 	_proxy = ProxyStubFactory::createProxy();
 
-	requestMap[0]=0;
+	requestMap[0] = 0;
 	pthread_t id1;
 	pthread_create(&id1, NULL, ZHTClient::listeningSocket, NULL);
-
 
 	if (_proxy == 0)
 		return -1;
@@ -92,7 +93,7 @@ int ZHTClient::init(const char *zhtConf, const char *neighborConf) {
 	string sneighborconf(neighborConf);
 
 	int rc = init(szhtconf, sneighborconf);
-	sem_init(&mutex,0,1);
+	sem_init(&mutex, 0, 1);
 	return rc;
 }
 
@@ -325,40 +326,32 @@ void * ZHTClient::listeningSocket(void *) {
 	//size_t my_msz = Env::get_msg_maxsize();
 	char *my_buf = (char*) calloc(100, sizeof(char));
 	size_t my_msz = 100;
-	int counter =0;
-
-
-
-
-
+	int counter = 0;
 
 	while (true) {
 		infd = accept(svrSock, in_addr, &in_len);
 
-
 		/* make the socket reusable */
 		int client_reuse = 1;
-		int client_ret = setsockopt(infd, SOL_SOCKET, SO_REUSEADDR, &client_reuse,
-				sizeof(client_reuse));
+		int client_ret = setsockopt(infd, SOL_SOCKET, SO_REUSEADDR,
+				&client_reuse, sizeof(client_reuse));
 		if (client_ret < 0) {
 			cerr << "reuse socket failed: [" << infd << "], " << endl;
 			return NULL;
 		}
 
-
-
 		//printf("accept \n");
 		recv(infd, my_buf, my_msz, 0);
-		printf("OHT: sock is %d\n",infd);
-                BdRecvBase *pbrb = new BdRecvFromServer();
-                bool ready = false;
-                string bd = pbrb->getBdStr(NULL, my_buf, my_msz, ready);
+		printf("OHT: sock is %d\n", infd);
+		BdRecvBase *pbrb = new BdRecvFromServer();
+		bool ready = false;
+		string bd = pbrb->getBdStr(NULL, my_buf, my_msz, ready);
 		//printf("%d\n",Const::toInt(bd.substr(0,3)));
 		//printf("received something\n");
-               // printf("thread counter %d\n",counter++);
+		// printf("thread counter %d\n",counter++);
 
 
-        close(infd);
+		close(infd);
 	}
 
 	close(svrSock);
@@ -400,7 +393,6 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 
 	string msg = zpack.SerializeAsString();
 
-
 	/*ZPack tmp;
 	 tmp.ParseFromString(msg);
 	 printf("{%s}:{%s,%s}\n", tmp.key().c_str(), tmp.val().c_str(),
@@ -415,8 +407,23 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 	// int sentSize = sendTo(sock, sendbuf, sendcount);
 	//_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
 	// 1. send and recv
-	_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
-	printf("oht send recv :%s\n",buf);
+	if ( _proxy->sendrecv(msg.c_str(), msg.size(), buf, msz) == false) {
+
+		ZHTUtil zu;
+		HostEntity he = zu.getHostEntityByKey(msg);
+		char intStr[10];
+		sprintf(intStr,"%d",he.port);
+		string strPort=intStr;
+		int proxyIndex = ConfHandler::getIndexOfProxy(strPort);
+
+
+		printf("OHT commonOpInternal %d\n",proxyIndex);
+		ConfHandler::NeighborVector.at(proxyIndex).setMark();
+		//printf("OHT:: client %d error\n",ConfHandler::NeighborVector.at(proxyIndex).value());
+		cout<<"OHT:: client sendrecv error "<< ConfHandler::NeighborVector.at(proxyIndex).value()<<endl;
+	}
+
+	printf("oht send recv :%s\n", buf);
 	// 2. set up a server socket
 
 	//	// 3. wait for a connection

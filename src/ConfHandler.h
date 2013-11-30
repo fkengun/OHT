@@ -57,7 +57,6 @@ public:
 	typedef vector<ConfEntry> VEC;
 
 	typedef ConfEntry MYTABLE[3][3];
-	//typedef ConfEntry VEC[3][3];
 	typedef VEC::iterator VIT;
 	typedef VEC::reverse_iterator VRIT;
 

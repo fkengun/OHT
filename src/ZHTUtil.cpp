@@ -28,6 +28,9 @@
  *      Contributor: Xiaobingo, KWang, DZhao
  */
 
+#include <time.h>
+#include <sys/time.h>
+
 #include "ZHTUtil.h"
 
 #include "Util.h"
@@ -51,15 +54,31 @@ ZHTUtil::~ZHTUtil() {
 }
 
 HostEntity ZHTUtil::getHostEntityByKey(const string& msg) {
-
+	struct timeval tv;
 	ZPack zpack;
 	zpack.ParseFromString(msg); //to debug
 
 	uint64_t hascode = HashUtil::genHash(zpack.key());
 	size_t node_size = ConfHandler::NeighborVector.size();
-	int index = hascode % node_size;
-	printf("OHT: hashcode %" PRIu64 ", node_size %d, index %d\n", hascode, node_size, index);
 
+	int repNum = atoi(ConfHandler::getNumReplicaFromConf().c_str());
+	int index = hascode % repNum;
+	index = index * repNum;
+
+	//printf("OHT: hashcode %" PRIu64 ", node_size %d, index %d\n", hascode, node_size, index);
+	printf("OHT: hashcode ,node_size %d, index %d, rep %d\n", node_size, index, repNum);
+	// OHT: if the proxy is down, use another replica
+	if (ConfHandler::NeighborVector.at(index).mark() == 1) {
+		printf("OHT: get Host entity by key error\n");
+
+		int randomNumber=0;
+
+		randomNumber = rand()%(repNum-1)+1;
+		//for(int i = 0 ; i < 100 ; i ++)
+			//printf("%d\n",rand()%(repNum-1));
+		index += randomNumber;
+		printf("OHT: getHostentity %d\n",index);
+	}
 	ConfEntry ce = ConfHandler::NeighborVector.at(index);
 
 	return buildHostEntity(ce.name(), atoi(ce.value().c_str()));
@@ -75,7 +94,7 @@ HostEntity ZHTUtil::getServerEntityByKey(const string& msg) {
 	uint64_t hascode = HashUtil::genHash(zpack.key());
 	size_t node_size = ConfHandler::PrimaryServerVector.size();
 	int index = hascode % node_size;
-	printf("OHT: hashcode %" PRIu64 ", node_size %d, index %d\n", hascode, node_size, index);
+	//printf("OHT: hashcode %" PRIu64 ", node_size %d, index %d\n", hascode, node_size, index);
 
 	ConfEntry ce = ConfHandler::PrimaryServerVector.at(index);
 
