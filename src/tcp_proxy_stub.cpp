@@ -53,7 +53,7 @@ using namespace iit::datasys::zht::dm;
 
 //TCPProxy::MAP TCPProxy::CONN_CACHE = TCPProxy::MAP();
 TCPProxy::TCPProxy() :
-		CONN_CACHE() {
+	CONN_CACHE() {
 
 }
 
@@ -71,22 +71,37 @@ bool TCPProxy::sendrecv(const void *sendbuf, const size_t sendcount,
 
 	int sock = getSockCached(he.host, he.port);
 
-	reuseSock(sock);
+	// OHT: revised by tianyang.
+	if (sock == -1) {
+		//int index = ConfHandler::getIndexOfProxy(he.port);
+		//ConfHandler::NeighborVector.at(index).setMark();
+		printf("OHT: TCPProxy error\n");
+		return false;
+	} else {
 
-	/*get mutex to protected shared socket*/
-	pthread_mutex_t *sock_mutex = getSockMutex(he.host, he.port);
-	lock_guard lock(sock_mutex);
+		reuseSock(sock);
 
-	/*send message to server over client sock fd*/
-	int sentSize = sendTo(sock, sendbuf, sendcount);
-	int sent_bool = sentSize == sendcount;
+		/*get mutex to protected shared socket*/
+		pthread_mutex_t *sock_mutex = getSockMutex(he.host, he.port);
+		lock_guard lock(sock_mutex);
 
-	/*receive response from server over client sock fd*/
-	recvcount = recvFrom(sock, recvbuf);
-	int recv_bool = recvcount >= 0;
+		/*send message to server over client sock fd*/
+		int sentSize = sendTo(sock, sendbuf, sendcount);
+		int sent_bool = sentSize == sendcount;
 
-	/*combine flags as value to be returned*/
-	return sent_bool && recv_bool;
+		/*receive response from server over client sock fd*/
+		recvcount = recvFrom(sock, recvbuf);
+		int recv_bool = recvcount >= 0;
+
+		/*combine flags as value to be returned*/
+
+		printf("OHT TCPProxy sendrecv information %d, %d, %d, \n",sentSize, sendcount,recvcount);
+		if(sent_bool && recv_bool)
+			printf("OHT TCPProxy is true\n");
+		//return sent_bool && recv_bool;
+		if(sentSize >0 && recv_bool)
+			return true;
+	}
 }
 
 /* added by fk for OHT */
@@ -315,7 +330,7 @@ bool TCPStub::recvsend(ProtoAddr addr, const void *recvbuf) {
 #else
 	HTWorker htw;
 #endif
-        
+
 	string result = htw.run(recvstr.data());
 
 #ifdef SCCB
