@@ -8,15 +8,15 @@
 Thumbs.db
 
 # Executables #
-src/zht_ben
-src/zht_cpptest
-src/zht_ctest
-src/zhtproxy
-src/zhtserver
-src/cpp_zhtclient_threaded_test
-src/c_zhtclient_lanl_threaded
-src/c_zhtclient_threaded_test
+zht_ben
+zht_cpptest
+zht_ctest
+zhtproxy
+zhtserver
+cpp_zhtclient_threaded_test
+c_zhtclient_lanl_threaded
+c_zhtclient_threaded_test
 
 # Project related #
-src/.cproject
-src/nbproject
+.cproject
+nbproject
