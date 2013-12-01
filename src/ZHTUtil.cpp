@@ -94,18 +94,18 @@ HostEntity ZHTUtil::getServerEntityByKey(const string& msg) {
 	uint64_t hascode = HashUtil::genHash(zpack.key());
 	size_t node_size = ConfHandler::myServerVector.size();
     int serverRepNum = atoi(ConfHandler::getNeighborReplicaNumFromConf().c_str());
-    int repNumProxy = ConfHandler::ReplicaNumProxy;
+    int repNumProxy = ConfHandler::ReplicaNumServer;
 	int index = ((hascode % node_size) / serverRepNum) * serverRepNum;
 	//printf("OHT: hashcode %" PRIu64 ", node_size %d, server index %d\n", hascode, node_size, index);
     // OHT: if the proxy is down, use another replica
 	if (ConfHandler::myServerVector.at(index).mark() == 1) {
-        printf("OHT: the primay copy is down\n");
+        printf("OHT: the primay server %s is down\n", ConfHandler::myServerVector.at(index).allToString().c_str());
         
         int randomNumber = 0;
 
 		randomNumber = rand() % (serverRepNum - 1) + 1;
         index += randomNumber;
-		printf("OHT: getHostentity %d\n", index);
+		printf("OHT: find replica server %s instead\n", ConfHandler::myServerVector.at(index).allToString().c_str());
     }
     
 	ConfEntry ce = ConfHandler::myServerVector.at(index);

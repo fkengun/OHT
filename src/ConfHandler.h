@@ -96,7 +96,7 @@ public:
     static VEC myServerVector;
     static VEC othersServerVector;
 	static MAP ServerSeeds;
-    static int ReplicaNumProxy;
+    static int ReplicaNumServer;
 	/* end add */
 	static MAP ZHTParameters;
 	static MAP NodeParameters;

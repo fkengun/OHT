@@ -69,7 +69,7 @@ string ConfHandler::CONF_ZHT = "zht.conf";
 string ConfHandler::CONF_NODE = "node.conf";
 string ConfHandler::CONF_NEIGHBOR = "neighbor.conf";
 string ConfHandler::CONF_SERVER = "server.conf"; // added by fk for OHT
-int ConfHandler::ReplicaNumProxy = 0;
+int ConfHandler::ReplicaNumServer = 0;
 string ConfHandler::NOVOHT_FILE = "";
 
 uint ConfHandler::ZC_MAX_ZHT = 0;
@@ -112,7 +112,8 @@ void ConfHandler::splitServerVector(string myPort) {
     int index = getIndexOfProxy(myPort);
     if (index < 0)
         exit(-1);
-    int proxyRepNum = ConfHandler::ReplicaNumProxy;
+    int serverRepNum = ConfHandler::ReplicaNumServer;
+    int proxyRepNum = atoi(getNeighborReplicaNumFromConf().c_str());
     cout << "OHT: ReplicaServerVector size " << othersServerVector.size() << endl;
     int serverPerProxy = (othersServerVector.size() * proxyRepNum) / NeighborVector.size();
     cout << "OHT: serverPerProxy " << serverPerProxy << endl;

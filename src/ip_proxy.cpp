@@ -89,7 +89,7 @@ void IPProxy::process(const int& fd, const char * const buf, sockaddr sender) {
     pa.fd = fd;
     pa.sender = calloc(1, sizeof (sockaddr));
     memcpy(pa.sender, &sender, sizeof (sockaddr));
-    
+
     /* added by fk for OHT, set local port */
     if (local_port.length() == 0)
         local_port = getLocalPort(fd);
@@ -126,8 +126,8 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
         /* send an acknowledge to original proxy */
         string result("result");
         _stub->sendBack(addr, result.data(), result.size());
-        cout << "OHT: an ack has been sent back to original proxy"  << endl;
-        
+        cout << "OHT: an ack has been sent back to original proxy" << endl;
+
         return;
     }
 
@@ -154,8 +154,9 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
         ce.value(portStr);
         ConfHandler::updateServerVector(ce, ConfHandler::myServerVector);
         bcastServerUpdate(he.host, he.port);
+    } else {
+        _proxy->reuseSock(sock);
     }
-    _proxy->reuseSock(sock);
 
     /* add IP address and port to zpack msg */
     HostEntity client;
@@ -222,7 +223,7 @@ void IPProxy::bcastServerUpdate(string ip, int port) {
         int neighborPort;
         getAddrFromConfEntry(ConfHandler::NeighborVector[i], neighborIp, neighborPort);
         sock = _proxy->makeClientSocket(neighborIp, neighborPort);
-        if (sock >= 0) { 
+        if (sock >= 0) {
             _proxy->reuseSock(sock);
             cout << "OHT: create sock with " << neighborIp << ", " << neighborPort << " succeed" << endl;
             BdSendBase *pbsb = new BdSendToServer((char*) msg.c_str());
@@ -237,12 +238,12 @@ void IPProxy::bcastServerUpdate(string ip, int port) {
                 /*cerr << "TCPProxy::sendTo(): error on BdSendToServer::bsend(...): "
                  << strerror(errno) << endl;*/
             }
-            
+
             _proxy->recvFrom(sock, buf);
         } else {
             cout << "OHT: create sock with " << neighborIp << ", " << neighborPort << " fails" << endl;
         }
-        
+
         close(sock);
     }
     free(buf);
