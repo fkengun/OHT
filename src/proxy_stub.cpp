@@ -95,6 +95,10 @@ int ProtoProxy::makeClientSocket(const string& host, const uint& port) {
 int ProtoProxy::reuseSock(int sock) {
     return -1;
 }
+
+int ProtoProxy::recvFrom(int sock, void* recvbuf) {
+    return -1;
+}
 /* end add */
 
 bool ProtoProxy::teardown() {

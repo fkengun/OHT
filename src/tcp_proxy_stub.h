@@ -63,7 +63,6 @@ public:
     virtual int recvFrom(int sock, void* recvbuf); // moved by fk for OHT
 protected:
 
-    virtual int recvFrom(int sock, void* recvbuf);
     virtual int loopedrecv(int sock, string &srecv);
 
 private:
