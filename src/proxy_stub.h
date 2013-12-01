@@ -71,6 +71,7 @@ public:
     virtual int getSockCached(const string& host, const uint& port);
 	virtual int makeClientSocket(const string& host, const uint& port);
     virtual int reuseSock(int sock); // moved by fk for OHT
+    virtual int recvFrom(int sock, void* recvbuf); // added by fk for OHT
     /* end add */
 
 	virtual bool teardown();

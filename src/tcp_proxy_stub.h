@@ -60,6 +60,7 @@ public:
 
     virtual int getSockCached(const string& host, const uint& port); // moved by fk for OHT
     virtual int makeClientSocket(const string& host, const uint& port); // moved by fk for OHT
+    virtual int recvFrom(int sock, void* recvbuf); // moved by fk for OHT
 protected:
 
     virtual int recvFrom(int sock, void* recvbuf);

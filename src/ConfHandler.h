@@ -69,7 +69,7 @@ public:
 	static void initProxyConf(string zhtConf, string neighborConf, string serverconf); // added by fk, for OHT
 	static string getPortFromConf();
 	static string getProtocolFromConf();
-	static string getNumReplicaFromConf(); // added by fk for OHT
+	static string getNeighborReplicaNumFromConf(); // added by fk for OHT
     static void splitServerVector(string myPort); // added by fk for OHT, split all servers into primaryservervector and replicaservervector
     static int getIndexOfProxy(string myPort); // added by fk for OHT, find index of self in neighbors
     static void updateServerVector(ConfEntry faultyServer, VEC &serverVector); // added by fk for OHT, mark faulty server in replica server vector
@@ -93,9 +93,10 @@ public:
 	static MAP NeighborSeeds;
 	static MYTABLE mytable;
 	/* added by fk, variables for server list info */
-    static VEC PrimaryServerVector;
-    static VEC ReplicaServerVector;
+    static VEC myServerVector;
+    static VEC othersServerVector;
 	static MAP ServerSeeds;
+    static int ReplicaNumProxy;
 	/* end add */
 	static MAP ZHTParameters;
 	static MAP NodeParameters;

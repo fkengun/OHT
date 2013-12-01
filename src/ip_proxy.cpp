@@ -121,8 +121,8 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
         ConfEntry ce;
         ce.assign(entry_str);
         cout << "OHT: receive update msg for " << ce.toString() << endl;
-        ConfHandler::updateServerVector(ce, ConfHandler::ReplicaServerVector);
-        ConfHandler::updateServerVector(ce, ConfHandler::ReplicaServerVector);
+        ConfHandler::updateServerVector(ce, ConfHandler::othersServerVector);
+        ConfHandler::updateServerVector(ce, ConfHandler::othersServerVector);
         /* send an acknowledge to original proxy */
         string result("result");
         _stub->sendBack(addr, result.data(), result.size());
@@ -152,51 +152,10 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
         string portStr = p_port;
         ce.name(he.host);
         ce.value(portStr);
-        ConfHandler::updateServerVector(ce, ConfHandler::PrimaryServerVector);
+        ConfHandler::updateServerVector(ce, ConfHandler::myServerVector);
         bcastServerUpdate(he.host, he.port);
     }
     _proxy->reuseSock(sock);
-    //    struct sockaddr_in dest;
-    //    memset(&dest, 0, sizeof (struct sockaddr_in)); /*zero the struct*/
-    //    dest.sin_family = AF_INET; /*storing the server info in sockaddr_in structure*/
-    //    dest.sin_port = htons(he.port);
-    //
-    //    struct hostent * hinfo = gethostbyname(he.host.c_str());
-    //    if (hinfo == NULL) {
-    //        cerr << "TCPProxy::makeClientSocket(): ";
-    //        herror(he.host.c_str());
-    //        return;
-    //    }
-    //
-    //    memcpy(&dest.sin_addr, hinfo->h_addr, sizeof (dest.sin_addr));
-    //
-    //    int sock = socket(PF_INET, SOCK_STREAM, 0); //try change here.................................................
-    //
-    //    if (sock < 0) {
-    //        cerr << "TCPProxy::makeClientSocket(): error on ::socket(...): "
-    //                << endl;
-    //        return;
-    //    }
-    //
-    //    int ret_con = connect(sock, (struct sockaddr *) &dest, sizeof (sockaddr));
-    //
-    //    if (ret_con < 0) {
-    //        cerr << "TCPProxy::makeClientSocket(): error on ::connect(...): "
-    //                << endl;
-    //        /* send update msg to other proxies when fails to connect a server */
-    //        bcastServerUpdate(he.host, he.port);
-    //        
-    //        return;
-    //    }
-    //
-    //    /* make the socket reusable */
-    //    int reuse_addr = 1;
-    //    int ret = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
-    //            sizeof (reuse_addr));
-    //    if (ret < 0) {
-    //        cerr << "reuse socket failed: [" << sock << "], " << endl;
-    //        return;
-    //    }
 
     /* add IP address and port to zpack msg */
     HostEntity client;
@@ -278,6 +237,8 @@ void IPProxy::bcastServerUpdate(string ip, int port) {
                 /*cerr << "TCPProxy::sendTo(): error on BdSendToServer::bsend(...): "
                  << strerror(errno) << endl;*/
             }
+            
+            _proxy->recvFrom(sock, buf);
         } else {
             cout << "OHT: create sock with " << neighborIp << ", " << neighborPort << " fails" << endl;
         }

@@ -57,10 +57,11 @@ int main(int argc, char **argv) {
 	string zhtConf;
 	string neighborConf;
 	string serverConf; // added by fk, server list conf file for OHT
+    string replicaNumProxy; // added by fk for OHT, replica level for proxy
 	string novohtDbFile;
 
 	int c;
-	while ((c = getopt(argc, argv, "z:n:s:p:f:h")) != -1) {
+	while ((c = getopt(argc, argv, "z:n:s:r:p:f:h")) != -1) {
 		switch (c) {
 		case 'z':
 			zhtConf = string(optarg);
@@ -72,6 +73,9 @@ int main(int argc, char **argv) {
 		case 's':
 			serverConf = string(optarg);
 			break;
+        case 'r':
+            replicaNumProxy = string(optarg);
+            break;
 		/* end add */
 		case 'p':
 			port_from_input = string(optarg);
@@ -102,6 +106,7 @@ int main(int argc, char **argv) {
 
 			/*init config*/
 			ConfHandler::initProxyConf(zhtConf, neighborConf, serverConf); // modified by fk, add server list conf file for OHT 
+            ConfHandler::ReplicaNumProxy = atoi(replicaNumProxy.c_str()); // added by fk for OHT, replica level for proxy
 
 			/*get protocol and port*/
 			protocol = ConfHandler::getProtocolFromConf();

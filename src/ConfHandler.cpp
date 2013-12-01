@@ -53,8 +53,8 @@ bool ConfHandler::BEEN_INIT = false;
 ConfHandler::VEC ConfHandler::NeighborVector = VEC();
 ConfHandler::MAP ConfHandler::NeighborSeeds = MAP();
 /* added by fk, variables for server list info */
-ConfHandler::VEC ConfHandler::PrimaryServerVector = VEC(); // servers that this proxy manages
-ConfHandler::VEC ConfHandler::ReplicaServerVector = VEC(); // servers that other proxies manage
+ConfHandler::VEC ConfHandler::myServerVector = VEC(); // servers that this proxy manages
+ConfHandler::VEC ConfHandler::othersServerVector = VEC(); // servers that other proxies manage
 ConfHandler::MAP ConfHandler::ServerSeeds = MAP();
 /* end add */
 ConfHandler::MAP ConfHandler::ZHTParameters = MAP();
@@ -69,6 +69,7 @@ string ConfHandler::CONF_ZHT = "zht.conf";
 string ConfHandler::CONF_NODE = "node.conf";
 string ConfHandler::CONF_NEIGHBOR = "neighbor.conf";
 string ConfHandler::CONF_SERVER = "server.conf"; // added by fk for OHT
+int ConfHandler::ReplicaNumProxy = 0;
 string ConfHandler::NOVOHT_FILE = "";
 
 uint ConfHandler::ZC_MAX_ZHT = 0;
@@ -102,7 +103,7 @@ string ConfHandler::getPortFromConf() {
 }
 
 /* added by fk for OHT */
-string ConfHandler::getNumReplicaFromConf() {
+string ConfHandler::getNeighborReplicaNumFromConf() {
 
 	return get_zhtconf_parameter(Const::ZC_NUM_REPLICAS);
 }
@@ -111,9 +112,9 @@ void ConfHandler::splitServerVector(string myPort) {
     int index = getIndexOfProxy(myPort);
     if (index < 0)
         exit(-1);
-    int replicaNum = atoi(getNumReplicaFromConf().c_str());
-    cout << "OHT: ReplicaServerVector size " << ReplicaServerVector.size() << endl;
-    int serverPerProxy = ReplicaServerVector.size() / NeighborVector.size() * replicaNum;
+    int proxyRepNum = ConfHandler::ReplicaNumProxy;
+    cout << "OHT: ReplicaServerVector size " << othersServerVector.size() << endl;
+    int serverPerProxy = (othersServerVector.size() * proxyRepNum) / NeighborVector.size();
     cout << "OHT: serverPerProxy " << serverPerProxy << endl;
 
 //    cout << "OHT: Replica server" << endl;
@@ -121,13 +122,13 @@ void ConfHandler::splitServerVector(string myPort) {
 //        cout << ReplicaServerVector[i].allToString() << endl;
 //    cout << endl;
 
-    int offset = (index / replicaNum) * serverPerProxy;
+    int offset = (index / proxyRepNum) * serverPerProxy;
     for (int i = 0; i < serverPerProxy; i++) {
         ConfEntry ce;
-        ce.assign(ReplicaServerVector[offset].toString());
+        ce.assign(othersServerVector[offset].toString());
         cout << "OHT: servers under me " << ce.toString() << endl;
-        PrimaryServerVector.push_back(ce);
-        ReplicaServerVector.erase(ReplicaServerVector.begin() + offset);
+        myServerVector.push_back(ce);
+        othersServerVector.erase(othersServerVector.begin() + offset);
     }
 //
 //    cout << "OHT: Primary server" << endl;
@@ -247,7 +248,7 @@ void ConfHandler::setServerSeeds(const string& serverCfg) {
 
 	setParametersInternal(serverCfg, ServerSeeds);
 
-	setServerVector(ReplicaServerVector);
+	setServerVector(othersServerVector);
 }
 /* end add */
 
@@ -330,7 +331,7 @@ void ConfHandler::setServerVector(VEC &replicaServerVector) {
 	ConfHandler::MIT kvi;
 	ConfHandler::MAP* map = &ConfHandler::ServerSeeds;
 
-    cout << "OHT: replica num " << ConfHandler::getNumReplicaFromConf() << endl;
+    cout << "OHT: replica num " << ConfHandler::getNeighborReplicaNumFromConf() << endl;
 
 	for (kvi = map->begin(); kvi != map->end(); kvi++) {
 

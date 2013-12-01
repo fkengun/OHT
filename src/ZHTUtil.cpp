@@ -61,7 +61,7 @@ HostEntity ZHTUtil::getHostEntityByKey(const string& msg) {
 	uint64_t hascode = HashUtil::genHash(zpack.key());
 	size_t node_size = ConfHandler::NeighborVector.size();
 
-	int repNum = atoi(ConfHandler::getNumReplicaFromConf().c_str());
+	int repNum = atoi(ConfHandler::getNeighborReplicaNumFromConf().c_str());
 	int index = hascode % repNum;
 	index = index * repNum;
 
@@ -92,11 +92,23 @@ HostEntity ZHTUtil::getServerEntityByKey(const string& msg) {
 	zpack.ParseFromString(msg); //to debug
 
 	uint64_t hascode = HashUtil::genHash(zpack.key());
-	size_t node_size = ConfHandler::PrimaryServerVector.size();
-	int index = hascode % node_size;
-	//printf("OHT: hashcode %" PRIu64 ", node_size %d, index %d\n", hascode, node_size, index);
+	size_t node_size = ConfHandler::myServerVector.size();
+    int serverRepNum = atoi(ConfHandler::getNeighborReplicaNumFromConf().c_str());
+    int repNumProxy = ConfHandler::ReplicaNumProxy;
+	int index = ((hascode % node_size) / serverRepNum) * serverRepNum;
+	//printf("OHT: hashcode %" PRIu64 ", node_size %d, server index %d\n", hascode, node_size, index);
+    // OHT: if the proxy is down, use another replica
+	if (ConfHandler::myServerVector.at(index).mark() == 1) {
+        printf("OHT: the primay copy is down\n");
+        
+        int randomNumber = 0;
 
-	ConfEntry ce = ConfHandler::PrimaryServerVector.at(index);
+		randomNumber = rand() % (serverRepNum - 1) + 1;
+        index += randomNumber;
+		printf("OHT: getHostentity %d\n", index);
+    }
+    
+	ConfEntry ce = ConfHandler::myServerVector.at(index);
 
 	return buildHostEntity(ce.name(), atoi(ce.value().c_str()));
 }
