@@ -59,7 +59,7 @@ public:
 	int mark() const;
 	bool setMark();
 	bool resetMark();
-
+	int asdf;
 	string operator()() const;
 	string toString() const;
         string allToString() const;

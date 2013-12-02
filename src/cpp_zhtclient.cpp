@@ -56,7 +56,6 @@ ZHTClient::ZHTClient() :
 }
 
 ZHTClient::ZHTClient(const string& zhtConf, const string& neighborConf) {
-
 	init(zhtConf, neighborConf);
 }
 
@@ -79,7 +78,7 @@ int ZHTClient::init(const string& zhtConf, const string& neighborConf) {
 
 	requestMap[0] = 0;
 	pthread_t id1;
-	pthread_create(&id1, NULL, ZHTClient::listeningSocket, NULL);
+	pthread_create(&id1, NULL, ZHTClient::listeningSocket, (void *)&repeatTime);
 
 	if (_proxy == 0)
 		return -1;
@@ -260,6 +259,26 @@ int ZHTClient::compare_swap(const char *key, const char *seen_val,
 
 	return rc;
 }
+// added by tianyang
+//void ZHTClient::setStartTime() {
+//	startTime = TimeUtil::getTime_msec();
+//}
+//
+//double ZHTClient::getStartTime() {
+//	return startTime;
+//}
+//void ZHTClient::setEndTime() {
+//	endTime = TimeUtil::getTime_msec();
+//}
+//double ZHTClient::getEndTime() {
+//	return endTime;
+//}
+//void ZHTClient::setRepeatNum(int s) {
+//	repeatNum = s;
+//}
+//int ZHTClient::getrepeatNum() {
+//	return repeatNum;
+//}
 
 int ZHTClient::state_change_callback(const string &key,
 		const string &expected_val, int lease) {
@@ -285,7 +304,8 @@ int ZHTClient::state_change_callback(const char *key, const char *expeded_val,
 }
 
 // oht: thread for a server socket
-void * ZHTClient::listeningSocket(void *) {
+void * ZHTClient::listeningSocket(void * argu) {
+	int operationNum = *(int *)argu;
 	int port = 55555;
 	struct sockaddr_in svrAdd_in;
 	int svrSock = -1;
@@ -339,13 +359,20 @@ void * ZHTClient::listeningSocket(void *) {
 			cerr << "reuse socket failed: [" << infd << "], " << endl;
 			return NULL;
 		}
-
+		//repeatTime++;
 		//printf("accept \n");
 		recv(infd, my_buf, my_msz, 0);
 		printf("OHT: sock is %d\n", infd);
 		BdRecvBase *pbrb = new BdRecvFromServer();
 		bool ready = false;
 		string bd = pbrb->getBdStr(NULL, my_buf, my_msz, ready);
+		counter++;
+		if(counter==operationNum){
+			double temp = TimeUtil::getTime_msec();
+			*(double *)argu =  temp;
+		}
+
+
 		//printf("%d\n",Const::toInt(bd.substr(0,3)));
 		//printf("received something\n");
 		// printf("thread counter %d\n",counter++);
@@ -407,20 +434,20 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 	// int sentSize = sendTo(sock, sendbuf, sendcount);
 	//_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz);
 	// 1. send and recv
-	if ( _proxy->sendrecv(msg.c_str(), msg.size(), buf, msz) == false) {
+	if (_proxy->sendrecv(msg.c_str(), msg.size(), buf, msz) == false) {
 
 		ZHTUtil zu;
 		HostEntity he = zu.getHostEntityByKey(msg);
 		char intStr[10];
-		sprintf(intStr,"%d",he.port);
-		string strPort=intStr;
+		sprintf(intStr, "%d", he.port);
+		string strPort = intStr;
 		int proxyIndex = ConfHandler::getIndexOfProxy(strPort);
 
-
-		printf("OHT commonOpInternal %d\n",proxyIndex);
+		printf("OHT commonOpInternal %d\n", proxyIndex);
 		ConfHandler::NeighborVector.at(proxyIndex).setMark();
 		//printf("OHT:: client %d error\n",ConfHandler::NeighborVector.at(proxyIndex).value());
-		cout<<"OHT:: client sendrecv error "<< ConfHandler::NeighborVector.at(proxyIndex).value()<<endl;
+		cout << "OHT:: client sendrecv error "
+				<< ConfHandler::NeighborVector.at(proxyIndex).value() << endl;
 	}
 
 	printf("oht send recv :%s\n", buf);
@@ -467,7 +494,9 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 int ZHTClient::teardown() {
 
 	sleep(3); // added by fk for OHT, just for test
+	//printf("OHT: cpp_zhtclient total time is %f\n",ZHTClient::EE-ZHTClient::SS);
 
+	printf("OHT: total running time is %f\n", repeatTime - startTime);
 	if (_proxy->teardown())
 		return 0;
 	else

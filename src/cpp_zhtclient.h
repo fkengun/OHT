@@ -37,11 +37,12 @@
 using namespace std;
 
 #include "lru_cache.h"
-
+//#include <TimeUtil.h>
 #include "ProxyStubFactory.h"
 #include <semaphore.h>
 #include <sys/types.h>
 #include "client_map_value.h"
+#include "Util.h"
 /*
  *
  */
@@ -72,7 +73,20 @@ public:
 	int state_change_callback(const char *key, const char *expeded_val,
 			int lease);
 	int teardown();
-	static void * listeningSocket(void * );
+	static void * listeningSocket(void * argu);
+//	void setStartTime();
+//	double getStartTime();
+//	void setEndTime();
+//	double getEndTime();
+//	void setRepeatNum(int s);
+//	int getrepeatNum();
+	double startTime;
+	double repeatTime;
+//	static double SS;
+//	static double EE;
+//	static double RR;
+
+
 private:
 	int commonOp(const string &opcode, const string &key, const string &val,
 			const string &val2, string &result, int lease);
@@ -82,6 +96,9 @@ private:
 
 private:
 	ProtoProxy *_proxy;
+//	double startTime;
+//	double endTime;
+//	int repeatNum;
 	sem_t mutex;
 	//map<int, Client_map_value> requestMap;
 	map<int, int> requestMap;

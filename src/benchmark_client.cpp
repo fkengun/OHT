@@ -75,12 +75,16 @@ int benchmarkInsert() {
 	double start = 0;
 	double end = 0;
 	start = TimeUtil::getTime_msec();
+	zc.startTime=start;
 	int errCount = 0;
 
 	int c = 0;
 	vector<string>::iterator it;
 	for (it = pkgList.begin(); it != pkgList.end(); it++) {
 
+		// added by tianyang
+		//if(c==0)
+			//ZHTClient::SS=TimeUtil::getTime_msec();
 		c++;
 
 		string pkg_str = *it;
@@ -270,6 +274,7 @@ int main(int argc, char **argv) {
 			break;
 		case 'o':
 			numOfOps = atoi(optarg);
+			zc.repeatTime = (double) numOfOps;
 			break;
 		case 'h':
 			printHelp = 1;
