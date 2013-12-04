@@ -62,22 +62,22 @@ HostEntity ZHTUtil::getHostEntityByKey(const string& msg) {
 	size_t node_size = ConfHandler::NeighborVector.size();
 
 	int repNum = atoi(ConfHandler::getNeighborReplicaNumFromConf().c_str());
-	int index = hascode % repNum;
+	int index = hascode % (node_size / repNum);
 	index = index * repNum;
 
 	//printf("OHT: hashcode %" PRIu64 ", node_size %d, index %d\n", hascode, node_size, index);
-	printf("OHT: hashcode ,node_size %d, index %d, rep %d\n", node_size, index, repNum);
+	//printf("OHT: hashcode, node_size %d, index %d, rep %d\n", node_size, index, repNum);
 	// OHT: if the proxy is down, use another replica
 	if (ConfHandler::NeighborVector.at(index).mark() == 1) {
 		printf("OHT: get Host entity by key error\n");
 
-		int randomNumber=0;
+		int randomNumber = 0;
 
-		randomNumber = rand()%(repNum-1)+1;
+		randomNumber = rand() % (repNum - 1) + 1;
 		//for(int i = 0 ; i < 100 ; i ++)
 			//printf("%d\n",rand()%(repNum-1));
 		index += randomNumber;
-		printf("OHT: getHostentity %d\n",index);
+		printf("OHT: getHostentity %d\n", index);
 	}
 	ConfEntry ce = ConfHandler::NeighborVector.at(index);
 
@@ -92,10 +92,10 @@ HostEntity ZHTUtil::getServerEntityByKey(const string& msg) {
 	zpack.ParseFromString(msg); //to debug
 
 	uint64_t hascode = HashUtil::genHash(zpack.key());
-	size_t node_size = ConfHandler::myServerVector.size();
+	size_t node_size = ConfHandler::myServerVector.size() + ConfHandler::othersServerVector.size();
     int serverRepNum = atoi(ConfHandler::getNeighborReplicaNumFromConf().c_str());
-    int repNumProxy = ConfHandler::ReplicaNumServer;
-	int index = ((hascode % node_size) / serverRepNum) * serverRepNum;
+    int serverPerProxy = ConfHandler::myServerVector.size() / serverRepNum;
+	int index = (hascode % (node_size / serverRepNum)) / serverPerProxy * serverRepNum;
 	//printf("OHT: hashcode %" PRIu64 ", node_size %d, server index %d\n", hascode, node_size, index);
     // OHT: if the proxy is down, use another replica
 	if (ConfHandler::myServerVector.at(index).mark() == 1) {

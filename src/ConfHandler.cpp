@@ -314,13 +314,13 @@ void ConfHandler::setNeighborVector(VEC &neighborVector) {
 	int column = 0;
 	for (kvi = map->begin(); kvi != map->end(); kvi++) {
 		// cout << "OHT map iterator print   " <<kvi->first <<"    " <<endl;
-		ConfHandler::mytable[row][column].assign(kvi->second.toString());
-
-		//cout << "OHT 2D table content   " << ConfHandler::mytable[row][column].name() << "    "<<ConfHandler::mytable[row][column].value() <<endl;
-		if(++column==3){
-			column=0;
-			row++;
-		}
+//		ConfHandler::mytable[row][column].assign(kvi->second.toString());
+//
+//		//cout << "OHT 2D table content   " << ConfHandler::mytable[row][column].name() << "    "<<ConfHandler::mytable[row][column].value() <<endl;
+//		if(++column==3){
+//			column=0;
+//			row++;
+//		}
 		neighborVector.push_back(kvi->second);
 		//	ConfHandler::mytable[0][0].assign("name,value");
 	}

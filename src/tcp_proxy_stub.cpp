@@ -67,7 +67,6 @@ bool TCPProxy::sendrecv(const void *sendbuf, const size_t sendcount,
 	ZHTUtil zu;
 	string msg((char*) sendbuf, sendcount);
 	HostEntity he = zu.getHostEntityByKey(msg);
-    printf("OHT: destination %s,%d\n", he.host.c_str(), he.port);
 
 	int sock = getSockCached(he.host, he.port);
 
@@ -95,7 +94,7 @@ bool TCPProxy::sendrecv(const void *sendbuf, const size_t sendcount,
 
 		/*combine flags as value to be returned*/
 
-		printf("OHT TCPProxy sendrecv information %d, %d, %d, \n",sentSize, sendcount,recvcount);
+		//printf("OHT: TCPProxy sendrecv information %d, %d, %d, \n",sentSize, sendcount,recvcount);
 		if(sent_bool && recv_bool)
 			printf("OHT TCPProxy is true\n");
 		//return sent_bool && recv_bool;
@@ -217,6 +216,15 @@ int TCPProxy::makeClientSocket(const string& host, const uint& port) {
 				<< strerror(errno) << endl;
 		return -1;
 	}
+    
+    /* make the socket reusable */
+	int reuse_addr = 1;
+	int ret = setsockopt(to_sock, SOL_SOCKET, SO_REUSEADDR, &reuse_addr,
+			sizeof(reuse_addr));
+	if (ret < 0) {
+		cerr << "reuse socket failed: [" << to_sock << "], " << endl;
+		return NULL;
+	}
 
 	int ret_con = connect(to_sock, (struct sockaddr *) &dest, sizeof(sockaddr));
 
@@ -240,7 +248,11 @@ int TCPProxy::sendTo(int sock, const void* sendbuf, int sendcount) {
 
 	//prompt errors
 	if (sentSize < sendcount) {
-
+        
+        /* 
+         * FIXME: bug found by fk in OHT, msg will be truncated, probably  
+         * because nested google protocol buffer string
+         */
 		//todo: bug prone
 		/*cerr << "TCPProxy::sendTo(): error on BdSendToServer::bsend(...): "
 		 << strerror(errno) << endl;*/
@@ -267,7 +279,7 @@ int TCPProxy::sendTo(int sock, const void* sendbuf, int sendcount) {
 #endif
 
 #ifdef BIG_MSG
-int TCPProxy::recvFrom(int sock, void* recvbuf) {
+    int TCPProxy::recvFrom(int sock, void* recvbuf) {
 
 	string result;
 	int recvcount = loopedrecv(sock, result);

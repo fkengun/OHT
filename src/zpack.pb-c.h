@@ -19,6 +19,12 @@ typedef struct _ZPack ZPack;
 struct  _ZPack
 {
   ProtobufCMessage base;
+  protobuf_c_boolean has_client_ip;
+  ProtobufCBinaryData client_ip;
+  protobuf_c_boolean has_client_port;
+  int32_t client_port;
+  protobuf_c_boolean has_seq_num;
+  int64_t seq_num;
   protobuf_c_boolean has_opcode;
   ProtobufCBinaryData opcode;
   protobuf_c_boolean has_key;
@@ -35,16 +41,10 @@ struct  _ZPack
   protobuf_c_boolean newvalnull;
   protobuf_c_boolean has_replicanum;
   int32_t replicanum;
-  protobuf_c_boolean has_client_ip;
-  ProtobufCBinaryData client_ip;
-  protobuf_c_boolean has_client_port;
-  int32_t client_port;
-  protobuf_c_boolean has_seq_num;
-  int64_t seq_num;
 };
 #define ZPACK__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&zpack__descriptor) \
-    , 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,0, 0,0, 0,0, 0,{0,NULL}, 0,0, 0,0 }
+    , 0,{0,NULL}, 0,0, 0,0, 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,{0,NULL}, 0,0, 0,0, 0,0 }
 
 
 /* ZPack methods */

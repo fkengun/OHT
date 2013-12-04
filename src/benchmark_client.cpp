@@ -66,16 +66,15 @@ void init_packages() {
 		package.add_listitem("item-----3");
 		package.add_listitem("item-----4");
 		package.add_listitem("item-----5");
+        
 		pkgList.push_back(package.SerializeAsString());
 	}
 }
 
 int benchmarkInsert() {
 
-	double start = 0;
+	double start = TimeUtil::getTime_msec();
 	double end = 0;
-	start = TimeUtil::getTime_msec();
-	zc.startTime=start;
 	int errCount = 0;
 
 	int c = 0;
@@ -226,11 +225,11 @@ float benchmarkRemove() {
 	return 0;
 }
 
-int benchmark(string &zhtConf, string &neighborConf) {
+int benchmark(string &zhtConf, string &neighborConf, int listenPort) { // modified by fk for OHT
 
 	srand(getpid() + TimeUtil::getTime_usec());
 
-	if (zc.init(zhtConf, neighborConf) != 0) {
+	if (zc.init(zhtConf, neighborConf, listenPort) != 0) { // modified by fk for OHT
 
 		cout << "ZHTClient initialization failed, program exits." << endl;
 		return -1;
@@ -262,9 +261,10 @@ int main(int argc, char **argv) {
 
 	string zhtConf = "";
 	string neighborConf = "";
+    int listenPort;
 
 	int c;
-	while ((c = getopt(argc, argv, "z:n:o:h")) != -1) {
+	while ((c = getopt(argc, argv, "z:n:o:p:h")) != -1) {
 		switch (c) {
 		case 'z':
 			zhtConf = string(optarg);
@@ -274,8 +274,13 @@ int main(int argc, char **argv) {
 			break;
 		case 'o':
 			numOfOps = atoi(optarg);
-			zc.repeatTime = (double) numOfOps;
+			zc._param.repeatNum = (double) numOfOps;
 			break;
+        /* added by fk for OHT, to specify listen port */
+        case 'p':
+            listenPort = atoi(optarg);
+            break;
+        /* end add */
 		case 'h':
 			printHelp = 1;
 			break;
@@ -293,9 +298,9 @@ int main(int argc, char **argv) {
 	}
 
 	try {
-		if (!zhtConf.empty() && !neighborConf.empty() && numOfOps != -1) {
+		if (!zhtConf.empty() && !neighborConf.empty() && numOfOps != -1 && listenPort > 1000) { // modified by fk for OHT
 
-			benchmark(zhtConf, neighborConf);
+			benchmark(zhtConf, neighborConf, listenPort);
 
 		} else {
 

@@ -111,6 +111,8 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
 
     /* update server vector when receive a special zapck */
     zpack.ParseFromString(recvstr);
+    //printf("OHT: msg received %s, length %d\n", recvstr.c_str(), recvstr.length());
+    //printf("OHT: client ip %s port %d\n", zpack.client_ip().c_str(), zpack.client_port());
     string opcode = zpack.opcode();
     if (opcode == Const::ZSC_OPC_SRVUPDT) {
         string entry_str = zpack.client_ip();
@@ -134,7 +136,7 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     /* send an acknowledge to client */
     string result("result");
     _stub->sendBack(addr, result.data(), result.size());
-    //cout << "OHT: an ack: " << count++ << " has been sent back to client"  << endl;
+    cout << "OHT: an ack: " << count++ << " has been sent back to client"  << endl;
 
     /* calculate the dest server */
     zpack.ParseFromString(recvstr);
@@ -159,13 +161,15 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     }
 
     /* add IP address and port to zpack msg */
-    HostEntity client;
-    getClientEntityBySock(addr.fd, client);
-    zpack.set_client_ip(client.host);
-    zpack.set_client_port(client.port);
+//    HostEntity client;
+//    getClientEntityBySock(addr.fd, client);
+//    zpack.set_client_ip(client.host);
+//    zpack.set_client_port(client.port);
+    
 
     /* forward the request to server */
     recvstr = zpack.SerializeAsString();
+    //printf("OHT: msg sent %s", recvstr.c_str());
     char *buf = (char*) calloc(Env::get_msg_maxsize(), sizeof (char));
     size_t msz = Env::get_msg_maxsize();
     _proxy->recvforward(recvstr.c_str(), recvstr.size(), buf, msz);

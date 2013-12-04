@@ -105,8 +105,7 @@ string ConfEntry::toString() const {
 
 	char buf[50];
 	memset(buf, 0, sizeof(buf));
-	int n = sprintf(buf, getFormat().c_str(), _name.c_str(), _value.c_str()); // commented by fk for OHT
-//    int n = sprintf(buf, "%s,%s,%1d", _name.c_str(), _value.c_str(), _mark); // print mark along with
+	int n = sprintf(buf, getFormat().c_str(), _name.c_str(), _value.c_str());
 
 	string result(buf, 0, n);
 

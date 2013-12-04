@@ -46,6 +46,16 @@ using namespace std;
 /*
  *
  */
+
+/* added by fk for OHT, parameter structure passed into listen thread */
+typedef struct struct_param_t {
+    int repeatNum;
+    int listenPort;
+    double startTime;
+    double endTime;
+} struct_param;
+/* end add */
+
 class ZHTClient {
 
 public:
@@ -56,6 +66,7 @@ public:
 
 	int init(const string &zhtConf, const string &neighborConf);
 	int init(const char *zhtConf, const char *neighborConf);
+    int init(const string &zhtConf, const string &neighborConf, int listenPort); // added by fk for OHT
 	int lookup(const string &key, string &result);
 	int lookup(const char *key, char *result);
 	int remove(const string &key);
@@ -80,8 +91,9 @@ public:
 //	double getEndTime();
 //	void setRepeatNum(int s);
 //	int getrepeatNum();
-	double startTime;
-	double repeatTime;
+//	double startTime;
+//	double repeatTime;
+    struct_param _param;
 //	static double SS;
 //	static double EE;
 //	static double RR;

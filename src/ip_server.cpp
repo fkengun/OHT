@@ -47,6 +47,7 @@ using namespace std;
 
 IPServer::IPServer() :
 _stub(ProxyStubFactory::createStub()) {
+    count = 0; // added by fk for OHT
 }
 
 IPServer::~IPServer() {
@@ -76,6 +77,8 @@ void IPServer::process(const int& fd, const char * const buf, sockaddr sender) {
     /* added by fk for OHT*/
     string result("result");
     _stub->sendBack(pa, result.data(), result.size());
+    //printf("OHT: socket fd %d\n", pa.fd);
+    //printf("OHT: msg received %s", bufstr.c_str());
     respond(bufstr.c_str(), pa);
     /* end add */
     _stub->recvsend(pa, bufstr.c_str());
@@ -92,13 +95,13 @@ void IPServer::respond(const char * const buf, ProtoAddr& addr) {
     zpack.ParseFromString(msg);
     client.host = zpack.client_ip();
     client.port = zpack.client_port();
-    printf("OHT: Respond to client: %s, port: %d\n", client.host.c_str(), client.port);
+    printf("OHT: Respond to client: %s, port: %d, count: %d\n", client.host.c_str(), client.port, count++);
     
     /* connect with the client */
     struct sockaddr_in dest;
     memset(&dest, 0, sizeof (struct sockaddr_in)); /*zero the struct*/
     dest.sin_family = PF_INET; /*storing the server info in sockaddr_in structure*/
-    dest.sin_port = htons(55555);
+    dest.sin_port = htons(client.port);
 
     struct hostent * hinfo = gethostbyname(client.host.c_str());
     if (hinfo == NULL) {
@@ -119,6 +122,7 @@ void IPServer::respond(const char * const buf, ProtoAddr& addr) {
     int ret_con = connect(sock, (struct sockaddr *) &dest, sizeof (sockaddr));
 
     if (ret_con < 0) {
+        printf("OHT: cannot connection with client\n");
         perror("TCPProxy::makeClientSocket(): error on ::connect(...): ");
         return;
     }

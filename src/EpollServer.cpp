@@ -259,7 +259,8 @@ int EpollServer::makeSvrSocket() { //only for svr
 		if (_tcp == true) { //TCP needs listen, UDP does not.
 
 			/* start listening, allowing a queue of up to 1 pending connection */
-			if (listen(svrSock, SOMAXCONN) < 0) {
+			//if (listen(svrSock, SOMAXCONN) < 0) { // commented by fk for OHT
+            if (listen(svrSock, 8000) < 0) {
 
 				printf(
 						"Error occurred while enabling listen on the socket:%d\n",

@@ -48,15 +48,25 @@
 #include "Env.h"
 #include "StrTokenizer.h"
 #include <map>
+#include <netdb.h>
 using namespace iit::datasys::zht::dm;
 
 ZHTClient::ZHTClient() :
 	_proxy(0), _msg_maxsize(0) {
-
+    /* added by fk for OHT, initialize param structure */
+    _param.repeatNum = 0;
+    _param.listenPort = 0;
+    _param.endTime = 0.0;
+    /* end add */
 }
 
 ZHTClient::ZHTClient(const string& zhtConf, const string& neighborConf) {
 	init(zhtConf, neighborConf);
+    /* added by fk for OHT, initialize param structure */
+    _param.repeatNum = 0;
+    _param.listenPort = 0;
+    _param.endTime = 0.0;
+    /* end add */
 }
 
 ZHTClient::~ZHTClient() {
@@ -76,10 +86,6 @@ int ZHTClient::init(const string& zhtConf, const string& neighborConf) {
 
 	_proxy = ProxyStubFactory::createProxy();
 
-	requestMap[0] = 0;
-	pthread_t id1;
-	pthread_create(&id1, NULL, ZHTClient::listeningSocket, (void *)&repeatTime);
-
 	if (_proxy == 0)
 		return -1;
 	else
@@ -95,6 +101,28 @@ int ZHTClient::init(const char *zhtConf, const char *neighborConf) {
 	sem_init(&mutex, 0, 1);
 	return rc;
 }
+
+/* added by fk for OHT, add param for listen port number */
+int ZHTClient::init(const string& zhtConf, const string& neighborConf, int listenPort) {
+    _param.startTime = TimeUtil::getTime_msec();
+
+	ConfHandler::initConf(zhtConf, neighborConf);
+
+	_msg_maxsize = Env::get_msg_maxsize();
+
+	_proxy = ProxyStubFactory::createProxy();
+
+	requestMap[0] = 0;
+	pthread_t id1;
+    _param.listenPort = listenPort;
+	pthread_create(&id1, NULL, ZHTClient::listeningSocket, (void *)&_param);
+
+	if (_proxy == 0)
+		return -1;
+	else
+		return 0;
+}
+/* end add */
 
 int ZHTClient::commonOp(const string &opcode, const string &key,
 		const string &val, const string &val2, string &result, int lease) {
@@ -305,30 +333,29 @@ int ZHTClient::state_change_callback(const char *key, const char *expeded_val,
 
 // oht: thread for a server socket
 void * ZHTClient::listeningSocket(void * argu) {
-	int operationNum = *(int *)argu;
-	int port = 55555;
+	struct_param *param = (struct_param *)argu;
 	struct sockaddr_in svrAdd_in;
 	int svrSock = -1;
-	printf("success 1\n");
+	//printf("success 1\n");
 	memset(&svrAdd_in, 0, sizeof(struct sockaddr_in));
 	svrAdd_in.sin_family = AF_INET;
 	svrAdd_in.sin_addr.s_addr = INADDR_ANY;
-	svrAdd_in.sin_port = htons(port);
-	printf("success 2\n");
+	svrAdd_in.sin_port = htons(param->listenPort);
+	//printf("success 2\n");
 	svrSock = socket(AF_INET, SOCK_STREAM, 0);
-	printf("success 3\n");
-	printf("svrSock: %d\n", svrSock);
+	//printf("success 3\n");
+	//printf("svrSock: %d\n", svrSock);
 	//ZHTClient::requestMap[2]=1;
 	if (bind(svrSock, (struct sockaddr*) &svrAdd_in, sizeof(struct sockaddr))
 			< 0) {
 		perror("bind error");
 	}
-	printf("bind \n");
+	//printf("bind \n");
 
-	if (listen(svrSock, 5) < 0) {
+	if (listen(svrSock, 8000) < 0) {
 		printf("listen error\n");
 	}
-	printf("listen \n");
+	//printf("listen \n");
 
 	/* make the socket reusable */
 	int reuse_addr = 1;
@@ -350,6 +377,10 @@ void * ZHTClient::listeningSocket(void * argu) {
 
 	while (true) {
 		infd = accept(svrSock, in_addr, &in_len);
+        if (infd < 0) {
+			cerr << "accept socket failed: [" << infd << "], " << endl;
+			return NULL;
+		}
 
 		/* make the socket reusable */
 		int client_reuse = 1;
@@ -362,21 +393,14 @@ void * ZHTClient::listeningSocket(void * argu) {
 		//repeatTime++;
 		//printf("accept \n");
 		recv(infd, my_buf, my_msz, 0);
-		printf("OHT: sock is %d\n", infd);
+		//printf("OHT: sock is %d\n", infd);
 		BdRecvBase *pbrb = new BdRecvFromServer();
 		bool ready = false;
 		string bd = pbrb->getBdStr(NULL, my_buf, my_msz, ready);
 		counter++;
-		if(counter==operationNum){
-			double temp = TimeUtil::getTime_msec();
-			*(double *)argu =  temp;
+		if(counter==param->repeatNum){
+			param->endTime = TimeUtil::getTime_msec();
 		}
-
-
-		//printf("%d\n",Const::toInt(bd.substr(0,3)));
-		//printf("received something\n");
-		// printf("thread counter %d\n",counter++);
-
 
 		close(infd);
 	}
@@ -415,6 +439,24 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 		zpack.set_newval(val2);
 		zpack.set_newvalnull(false);
 	}
+    
+    /* added by fk for OHT, add listen port to zpack */
+    char hostname[MAXHOSTNAMELEN];
+    memset(hostname, 0, MAXHOSTNAMELEN);
+    int ret = gethostname(hostname, MAXHOSTNAMELEN);
+    if (ret != 0) {
+        printf("OHT: get hostname failed\n");
+        exit(-1);
+    }
+    //printf("OHT: get hostname %s\n", hostname);
+    struct hostent *hostn = (struct hostent *)malloc(sizeof(struct hostent));
+    hostn = gethostbyname(hostname);
+    struct in_addr addr;
+    bcopy(hostn->h_addr_list[0], (char *) &addr, sizeof(addr));
+    zpack.set_client_ip(inet_ntoa(addr));
+    zpack.set_client_port(_param.listenPort);
+    //printf("OHT: add local ip %s, local port %d\n", zpack.client_ip().c_str(), zpack.client_port());
+    /* end add */
 
 	zpack.set_lease(Const::toString(lease));
 
@@ -443,35 +485,12 @@ string ZHTClient::commonOpInternal(const string &opcode, const string &key,
 		string strPort = intStr;
 		int proxyIndex = ConfHandler::getIndexOfProxy(strPort);
 
-		printf("OHT commonOpInternal %d\n", proxyIndex);
+		printf("OHT: commonOpInternal %d\n", proxyIndex);
 		ConfHandler::NeighborVector.at(proxyIndex).setMark();
 		//printf("OHT:: client %d error\n",ConfHandler::NeighborVector.at(proxyIndex).value());
-		cout << "OHT:: client sendrecv error "
+		cout << "OHT: client sendrecv error "
 				<< ConfHandler::NeighborVector.at(proxyIndex).value() << endl;
 	}
-
-	printf("oht send recv :%s\n", buf);
-	// 2. set up a server socket
-
-	//	// 3. wait for a connection
-	//	if (infd == -1) {
-	//
-	//		free(in_addr);
-	//
-	//		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
-	//
-	//			/* We have processed all incoming connections. */
-	//			break;
-	//		} else {
-	//
-	//			perror("accept");
-	//			break;
-	//		}
-	//	}
-
-
-	// 4. receive message from the
-
 
 	/*...parse status and result*/
 	string sstatus;
@@ -496,7 +515,7 @@ int ZHTClient::teardown() {
 	sleep(3); // added by fk for OHT, just for test
 	//printf("OHT: cpp_zhtclient total time is %f\n",ZHTClient::EE-ZHTClient::SS);
 
-	printf("OHT: total running time is %f\n", repeatTime - startTime);
+	printf("OHT: total running time is %f\n", _param.endTime - _param.startTime);
 	if (_proxy->teardown())
 		return 0;
 	else

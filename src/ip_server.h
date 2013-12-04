@@ -48,7 +48,9 @@ public:
 			sockaddr sender);
 
 private:
-        void respond(const char * const buf, ProtoAddr& addr);
+    void respond(const char * const buf, ProtoAddr& addr);
+    
+    int count; // added by fk for OHT
     
 	ProtoStub *_stub;
 };

@@ -1,13 +1,14 @@
 message ZPack{
-	optional bytes opcode = 1; //001:lookup, 002:remove, 003:insert, 004:append, 005:compare_swap, 007:server_list_update
-	optional bytes key = 2;
-	optional bytes val = 3;
-	optional bytes newval = 4; //used by compare_swap
-	optional bytes lease = 5; //used by state_changed_callback
-	optional bool valnull = 6;	
-	optional bool newvalnull = 7; //used by compare_swap
-	optional int32 replicanum = 8;	
-        optional bytes client_ip = 9; //used by OHT
-        optional int32 client_port = 10; //used by OHT
-        optional int64 seq_num = 11; //used by OHT
+    optional bytes client_ip = 1; //used by OHT
+    optional int32 client_port = 2; //used by OHT
+    optional int64 seq_num = 3; //used by OHT
+	optional bytes opcode = 4; //001:lookup, 002:remove, 003:insert, 004:append, 005:compare_swap, 007:server_list_update
+	optional bytes key = 5;
+	optional bytes val = 6;
+	optional bytes newval = 7; //used by compare_swap
+	optional bytes lease = 8; //used by state_changed_callback
+	optional bool valnull = 9;	
+	optional bool newvalnull = 10; //used by compare_swap
+	optional int32 replicanum = 11;	
+    
 }
