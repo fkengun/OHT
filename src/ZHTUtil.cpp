@@ -95,7 +95,7 @@ HostEntity ZHTUtil::getServerEntityByKey(const string& msg) {
 	size_t node_size = ConfHandler::myServerVector.size() + ConfHandler::othersServerVector.size();
     int serverRepNum = atoi(ConfHandler::getNeighborReplicaNumFromConf().c_str());
     int serverPerProxy = ConfHandler::myServerVector.size() / serverRepNum;
-	int index = (hascode % (node_size / serverRepNum)) / serverPerProxy * serverRepNum;
+	int index = (hascode % (node_size / serverRepNum)) % serverPerProxy * serverRepNum;
 	//printf("OHT: hashcode %" PRIu64 ", node_size %d, server index %d\n", hascode, node_size, index);
     // OHT: if the proxy is down, use another replica
 	if (ConfHandler::myServerVector.at(index).mark() == 1) {
