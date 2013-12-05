@@ -77,7 +77,7 @@ void IPServer::process(const int& fd, const char * const buf, sockaddr sender) {
     /* added by fk for OHT*/
     string result("result");
     _stub->sendBack(pa, result.data(), result.size());
-    printf("OHT: socket fd %d\n", pa.fd);
+    //printf("OHT: socket fd %d\n", pa.fd);
     //printf("OHT: msg received %s", bufstr.c_str());
     respond(bufstr.c_str(), pa);
     /* end add */
@@ -95,7 +95,7 @@ void IPServer::respond(const char * const buf, ProtoAddr& addr) {
     zpack.ParseFromString(msg);
     client.host = zpack.client_ip();
     client.port = zpack.client_port();
-    printf("OHT: Respond to client: %s, port: %d, count: %d\n", client.host.c_str(), client.port, count++);
+    //printf("OHT: Respond to client: %s, port: %d, count: %d\n", client.host.c_str(), client.port, count++);
     
     /* connect with the client */
     struct sockaddr_in dest;

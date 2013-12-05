@@ -136,7 +136,7 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     /* send an acknowledge to client */
     string result("result");
     _stub->sendBack(addr, result.data(), result.size());
-    cout << "OHT: an ack: " << count++ << " has been sent back to client"  << endl;
+    //cout << "OHT: an ack: " << count++ << " has been sent back to client"  << endl;
 
     /* calculate the dest server */
     zpack.ParseFromString(recvstr);
