@@ -144,7 +144,8 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
     //cout << "OHT: Forwarding to server: " << he.host.c_str() << ", port: " << he.port << endl;
 
     /* connect with server */
-    int sock = _proxy->makeClientSocket(he.host, he.port);
+    //int sock = _proxy->makeClientSocket(he.host, he.port);
+    int sock =_proxy->getSockCached(he.host, he.port);
     if (sock < 0) {
         /* send update msg to other proxies when fails to connect a server */
         cout << "OHT: find failure server " << he.host << ", " << he.port << endl;
@@ -160,24 +161,17 @@ void IPProxy::forward(ProtoAddr addr, const void *recvbuf) {
         _proxy->reuseSock(sock);
     }
 
-    /* add IP address and port to zpack msg */
-//    HostEntity client;
-//    getClientEntityBySock(addr.fd, client);
-//    zpack.set_client_ip(client.host);
-//    zpack.set_client_port(client.port);
-    
-
     /* forward the request to server */
     recvstr = zpack.SerializeAsString();
     //printf("OHT: msg sent %s", recvstr.c_str());
     char *buf = (char*) calloc(Env::get_msg_maxsize(), sizeof (char));
     size_t msz = Env::get_msg_maxsize();
-    _proxy->recvforward(recvstr.c_str(), recvstr.size(), buf, msz);
+    _proxy->recvforward(recvstr.c_str(), recvstr.size(), buf, msz, sock);
 
     free(buf);
     //cout << "OHT: Request has been forward to server successfully" << endl;
 
-    close(sock);
+    //close(sock);
     //cout << "OHT: socket has been closed" << endl;
 }
 

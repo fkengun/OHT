@@ -77,7 +77,7 @@ void IPServer::process(const int& fd, const char * const buf, sockaddr sender) {
     /* added by fk for OHT*/
     string result("result");
     _stub->sendBack(pa, result.data(), result.size());
-    //printf("OHT: socket fd %d\n", pa.fd);
+    printf("OHT: socket fd %d\n", pa.fd);
     //printf("OHT: msg received %s", bufstr.c_str());
     respond(bufstr.c_str(), pa);
     /* end add */

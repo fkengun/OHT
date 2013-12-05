@@ -105,21 +105,21 @@ bool TCPProxy::sendrecv(const void *sendbuf, const size_t sendcount,
 
 /* added by fk for OHT */
 bool TCPProxy::recvforward(const void *sendbuf, const size_t sendcount,
-		void *recvbuf, size_t &recvcount) {
+		void *recvbuf, size_t &recvcount, int sock) {
 
-	/*get client sock fd*/
-	ZHTUtil zu;
-	string msg((char*) sendbuf, sendcount);
-	HostEntity he = zu.getServerEntityByKey(msg);
-    //printf("OHT: Server ip: %s, port: %d\n", he.host.c_str(), he.port);
-
-	int sock = getSockCached(he.host, he.port);
-
-	reuseSock(sock);
-
-	/*get mutex to protected shared socket*/
-	pthread_mutex_t *sock_mutex = getSockMutex(he.host, he.port);
-	lock_guard lock(sock_mutex);
+//	/*get client sock fd*/
+//	ZHTUtil zu;
+//	string msg((char*) sendbuf, sendcount);
+//	HostEntity he = zu.getServerEntityByKey(msg);
+//    //printf("OHT: Server ip: %s, port: %d\n", he.host.c_str(), he.port);
+//
+//	int sock = getSockCached(he.host, he.port);
+//
+//	reuseSock(sock);
+//
+//	/*get mutex to protected shared socket*/
+//	pthread_mutex_t *sock_mutex = getSockMutex(he.host, he.port);
+//	lock_guard lock(sock_mutex);
 
 	/*send message to server over client sock fd*/
 	int sentSize = sendTo(sock, sendbuf, sendcount);

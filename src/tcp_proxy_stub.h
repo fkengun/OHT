@@ -54,7 +54,7 @@ public:
             void *recvbuf, size_t &recvcount);
     /* added by fk for OHT, get host from server list instead of neighbor list */
     virtual bool recvforward(const void *sendbuf, const size_t sendcount,
-            void *recvbuf, size_t &recvcount);
+            void *recvbuf, size_t &recvcount, int sock);
     /* end add */
     virtual bool teardown();
 

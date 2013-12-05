@@ -349,6 +349,7 @@ void * ZHTClient::listeningSocket(void * argu) {
 	if (bind(svrSock, (struct sockaddr*) &svrAdd_in, sizeof(struct sockaddr))
 			< 0) {
 		perror("bind error");
+        exit(-1);
 	}
 	//printf("bind \n");
 
